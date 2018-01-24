@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>WebService Logic</title>
+    </head>
+    <body>
+        <h1>WebService Logic</h1>
+        <p>Projeto desenvolvido no treinamento de JEE e SQL</p>
+        <p>
+            O webservice têm o objetivo de gerenciar o cadastro de contas do mês,
+            a comunicação ocorrerá via JSON, respeitando as 
+            instruções abaixo:
+        </p>
+        <br><h3><ul><li>CONTA</li></ul></h3>
+        <p>Campos e descrição para comunicação com o webservice.</p>
+        <p><b>id</b> : ID DA CONTA</p>
+        <p><b>nome</b> : NOME DA CONTA</p>
+        <p><b>data</b> : DATA DE VENCIMENTO DA CONTA, O CAMPO DEVE SEGUIR O PADRÃO "YYYY-MM-DD"</p>
+        <p><b>valor</b> : VALOR DA CONTA, PARA INFORMAR AS CASAS DECIMAIS UTILIZE PONTO (.)</p>
+        <p><b>tipoLancamento</b> : "TIPO DE LANCAMENTO DA CONTA</p>
+        <p><b>exemplo: </b> { "id" : id , "nome" : "Inglês" , "data" : "2017-12-26" , "valor" : 250.95 , 
+            "tipoLancamento" : "Boleto Bancário" } </p>
+
+        <!-- CADASTRO DE NOVA CONTA -->
+        <br><h3><ul><li>CADASTRAR CONTA</li></ul></h3>
+        <p>
+            Para cadastro de novas contas deve-se enviar JSON com os campos da nova conta sem o campo ID,
+            este campo será preenchido pelo banco de dados, caso seja informado ID o mesmo será desconsiderado. 
+        </p>
+        <p>
+            <b>Exemplo: </b> { "nome" : "Inglês" , "data" : "2017-12-26" , "valor" : 250 , 
+            "tipoLancamento" : "Boleto Bancário" } 
+        </p>
+        <p>
+            <b>URL: </b> LogicWebService/services/conta 
+        </p>
+        <p>
+            <b>Método: </b> POST
+        </p>
+        <p>
+            <b>{LEMBRAR: enviar no retorno o ID da nova conta cadastrada}</b>
+        </p>
+
+        <!-- ATUALIZAÇÃO DE CONTA -->
+        <br><h3><ul><li>ATUALIZAR CONTA</li></ul></h3>
+        <p>
+            Para atualizar uma conta deve-se enviar JSON com todos os campos preenchidos,
+            incluindo o ID, que será responsável por identificar o registro na base de dados
+            a ser atualizado.
+        </p>
+        <p>
+            <b>Exemplo: </b> { "id" : 1 , "nome" : "Inglês" , "data" : "2017-12-26" , "valor" : 250 , 
+            "tipoLancamento" : "Boleto Bancário" } 
+        </p>
+        <p>
+            <b>URL: </b> LogicWebService/services/conta 
+        </p>
+        <p>
+            <b>Método: </b> PUT
+        </p>
+
+        <!-- REMOÇÃO DE CONTA -->
+        <br><h3><ul><li>REMOVER CONTA</li></ul></h3>
+        <p>
+            Para remover uma conta deve-se enviar JSON com o ID da respectiva conta, os demais
+            campos são desnecessários porém sua informação não terá influência.
+        </p>
+        <p>
+            <b>Exemplo: </b> { "id" : 1 } 
+        </p>
+        <p>
+            <b>URL: </b> LogicWebService/services/conta 
+        </p>
+        <p>
+            <b>Método: </b> DELETE
+        </p>
+
+        <!-- CONSULTAR UM CONTA -->
+        <br><h3><ul><li>CONSULTAR CONTA INDIVIDUALMENTE</li></ul></h3>
+        <p>
+            Para consultar uma conta deve-se informar na URL o ID da respectiva conta. 
+        </p>
+        <p>
+            <b>Exemplo: </b> LogicWebService/services/conta/1 (deve colocar o / (barra) + ID ao final da URL)
+        </p>
+        <p>
+            <b>URL: </b> LogicWebService/services/conta 
+        </p>
+        <p>
+            <b>Método: </b> GET
+        </p>
+
+        <!-- CONSULTAR TODAS AS CONTAS -->
+        <br><h3><ul><li>CONSULTAR CONTAS CADASTRADAS</li></ul></h3>
+        <p>
+            Para consultar todas as contas cadastradas deve apenas informar a URL abaixo. 
+        </p>
+        <p>
+            <b>URL: </b> LogicWebService/services/conta 
+        </p>
+        <p>
+            <b>Método: </b> GET
+        </p>
+
+        <!-- CONSULTAR CONTA POR NOME -->
+        <br><h3><ul><li>CONSULTAR CONTA POR NOME</li></ul></h3>
+        <p>
+            Para consultar conta pelo seu nome (ou parte dele), deve-se enviar JSON apenas
+            com o campo nome (o preenchimento dos demais não interfere na consulta)
+            preenchido com a respectiva informação, a consulta não difere maiúscula ou minúscula
+            porém deve-se atentar a acentuação. 
+        </p>
+        <p>
+            <b>Exemplo: </b> { "nome" : "Ingl" } 
+        </p>
+        <p>
+            <b>URL: </b> LogicWebService/services/conta/pornome 
+        </p>
+        <p>
+            <b>Método: </b> POST
+        </p>
+
+        <!-- CONSULTAR CONTA POR DATA DE VENCIMENTO -->
+        <br><h3><ul><li>CONSULTAR CONTA POR VENCIMENTO</li></ul></h3>
+        <p>
+            A consulta de conta pelo seu vencimento pode ser feito selecionando um intervalo de tempo,
+            um dia específico, mês ou ano. Para selecionar um intervalo deve-se informar uma data inicial 
+            e final, já para selecionar um dia específico deve-se informar apenas o campo referente 
+            a data inicial. Para consultar um determindo mês ou ano o objeto JSON é diferente da consulta inicial,
+            conforme pode-se observar abaixo, esta consulta têm prioridade sendo assim se informado um destes campos
+            na mesma consulta que o JSON utilizado para consultar um intervalos, somente serão consideros os campos
+            MES e ANO no arquivo JSON.
+            
+        </p>
+        <p>
+            <b>Exemplo: </b> 
+        <p>Consulta por intervalo: { "vencimentoInicial" : "2017-12-01", "vencimentoFinal" : "2017-12-32" }</p>
+        <p>Consulta por data: { "vencimentoInicial" : "2017-12-01" }</p>
+        <p>Consulta por ano e mês: { "ano" : 2017, "mes" : 12 }</p>
+        <p>Consulta somente por mês: { "mes" : 12 }</p>
+        <p>Consulta somente por ano: { "ano" : 2017 }</p>
+        </p>
+        <p>
+            <b>URL: </b> LogicWebService/services/conta/porvencimento
+        </p>
+        <p>
+            <b>Método: </b> POST
+        </p>
+        
+         <!-- CONSULTAR CONTA POR TIPO DE LANCAMENTO -->
+        <br><h3><ul><li>CONSULTAR CONTA TIPO DE LANÇAMENTO</li></ul></h3>
+        <p>
+            A consulta de conta pelo seu tipo de lançamento deve seguir os padrões abaixo, 
+            a consulta não diferencia maiúsculo e minúsculo, porém deve-se observar a acentução.
+        </p>
+        <p>
+            <b>Exemplo: </b> { "tipoLancamento" : "boleto bancário" }
+        <p>
+            <b>URL: </b> LogicWebService/services/conta/porlancamento
+        </p>
+        <p>
+            <b>Método: </b> POST
+        </p>
+        
+        <br>
+        <h1>FASES DO PROJETO</h1>
+        <p><b>Primeira Fase</b></p>
+        <p>
+        <ul>
+            <li>Criação do Projeto: <b>OK</b></li>
+            <li>Elaboração das camadas SERVICE / EJB / DAO : <b>OK</b></li>
+            <li>Escritas dos Métodos DAO para inserção / remoção / consulta / atualização : <b>OK</b></li>
+            <li>Validação dos campos do objeto CONTA : <b>OK</b></li>
+            <li>Normalização dos tipos de lançamento : <b></b></li>
+            <li>Aplicação do Session Beans Stateless : <b></b></li>
+            <li>Elaboração de consulta por período de tempo : <b>OK</b></li>
+            <li>Elaboração de consulta pelo nome da conta (ou parte do nome)  : <b>OK</b></li>
+            <li>Elaboração de consulta por tipo de lançamento : <b>OK</b></li>
+            <li>Elaboração de teste automatizados: <b>OK</b></li>
+            <li>Elaboração de Manual e utilização e implantação : <b></b></li>
+            <li>Tratar Exceções e dar retorno ao cliente : <b>OK</b></li>
+        </ul>
+    </p>
+    <br> 
+    <p><b>BASE DE DADOS</b></p>
+    <p>Para a base de dados crie uma database LOGICDB, utilize o script abaixo para criação da entidade CONTA :</p>
+    <p>
+        CREATE TABLE CONTA (ID INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY, NOME VARCHAR(255), DATA DATE, VALOR DECIMAL(10,2), TIPOLANCAMENTO VARCHAR(255))
+    </p>
+    <br>
+</body>
+</html>
