@@ -8,18 +8,44 @@ import junit.framework.Assert;
 import logic.solzanir.excecoes.ContaException;
 import logic.solzanir.modelos.ContaVO;
 import logic.solzanir.beans.ContaBean;
+import logic.solzanir.database.ContaDAO;
 import logic.solzanir.modelos.ContaVencimentoVO;
 import logic.solzanir.util.Constantes;
+import logic.solzanir.util.TipoLancamentoEnum;
+import logic.solzanir.util.ValidadorData;
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit.InSequence;
+import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
  * @date 07/01/2018
  */
-
+@RunWith(Arquillian.class)
 public class TesteConta {
-    /*
+
+    @Deployment
+    public static Archive<?> criarArquivoTeste() {
+        Archive<?> arquivoTeste = ShrinkWrap.create(WebArchive.class, "aplicacaoTeste.jar")
+                .addClasses(ContaBean.class, 
+                            ContaDAO.class, 
+                            ValidadorData.class, 
+                            ContaException.class,
+                            ContaVO.class,
+                            ContaVencimentoVO.class,
+                            TipoLancamentoEnum.class,
+                            Constantes.class)
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+        return arquivoTeste;
+    }
+
     @Inject
     private ContaBean bean;
     
@@ -36,6 +62,7 @@ public class TesteConta {
     }
 
     @Test
+    @InSequence(1)
     public void testaInsercaoDeConta() {
       
         try {
@@ -51,6 +78,7 @@ public class TesteConta {
     }
     
     @Test
+    @InSequence(2)
     public void testaConsultaDeContas() {
         
         try {
@@ -65,6 +93,7 @@ public class TesteConta {
     }
 
     @Test
+    @InSequence(3)
     public void testaConsultaDeContaPorNome() throws ContaException {
        
         try {
@@ -79,6 +108,7 @@ public class TesteConta {
     }
 
     @Test
+    @InSequence(4)
     public void testaAtualizacaoDeConta_testaBuscaPorID() {
         
         try {
@@ -97,6 +127,8 @@ public class TesteConta {
         
     }
     
+    @Test
+    @InSequence(5)
     public void testaConsultaDeContaPorVencimento(){
         
         ContaVencimentoVO vencimento = new ContaVencimentoVO();
@@ -114,6 +146,8 @@ public class TesteConta {
         
     }
     
+    @Test
+    @InSequence(6)
     public void testaConsultaDeContaPorAnoMes(){
         
         ContaVencimentoVO vencimento = new ContaVencimentoVO();
@@ -137,5 +171,5 @@ public class TesteConta {
         }
         
     }
-    */
+
 }
