@@ -1,6 +1,8 @@
+/home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/modelos/ContaDTO.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/beans/ContaBean.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/util/TipoLancamentoEnum.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/database/ContaDAO.java
+/home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/modelos/TipoLancamentoDTO.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/modelos/ContaVO.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/util/ValidadorData.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/util/Constantes.java

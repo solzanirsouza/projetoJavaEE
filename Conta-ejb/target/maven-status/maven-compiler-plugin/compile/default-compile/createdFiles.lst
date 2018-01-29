@@ -3,7 +3,9 @@ logic/solzanir/util/Constantes.class
 logic/solzanir/modelos/ContaVO.class
 logic/solzanir/excecoes/ContaException.class
 logic/solzanir/modelos/MensagemResponse.class
-logic/solzanir/util/ValidadorData.class
-logic/solzanir/database/ContaDAO.class
+logic/solzanir/modelos/ContaDTO.class
 logic/solzanir/util/TipoLancamentoEnum.class
 logic/solzanir/beans/ContaBean.class
+logic/solzanir/util/ValidadorData.class
+logic/solzanir/database/ContaDAO.class
+logic/solzanir/modelos/TipoLancamentoDTO.class

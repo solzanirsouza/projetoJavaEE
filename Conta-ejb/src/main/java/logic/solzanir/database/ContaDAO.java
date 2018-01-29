@@ -1,18 +1,14 @@
 package logic.solzanir.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.sql.DataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import logic.solzanir.modelos.ContaDTO;
 import logic.solzanir.modelos.ContaVO;
-import logic.solzanir.excecoes.ContaException;
 import logic.solzanir.modelos.ContaVencimentoVO;
+import logic.solzanir.modelos.TipoLancamentoDTO;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -20,398 +16,142 @@ import logic.solzanir.modelos.ContaVencimentoVO;
  */
 @Stateless
 public class ContaDAO {
-
-    @Resource(lookup = "java:jboss/datasources/HSQLDS")
-    private DataSource ds;
     
-    //Buscar conta por ID na base de dados
-    public ContaVO getConta(int id) throws ContaException, SQLException {
-
-        ContaVO conta = new ContaVO();
-        Connection conn = null;
-        PreparedStatement pstm = null;
-        ResultSet rs = null;
-
-        try {
-            
-            String sql = "SELECT * FROM CONTA WHERE ID = ?";
-            conn = ds.getConnection();
-            pstm = conn.prepareStatement(sql);
-            pstm.setInt(1, id);
-            rs = pstm.executeQuery();
-
-            while (rs.next()) {
-                populaConta(conta, rs);
-            }
-
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO PESQUISAR CONTA POR ID");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                rs.close();
-                pstm.close();
-                conn.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA CONSULTA DE CONTA POR ID");
-                throw new SQLException(ex);
-            }
-        }
-
-        return conta;
-
-    }
-
-    //Buscar todas as contas na base de dados
-    public List<ContaVO> getContas() throws ContaException, SQLException {
-
-        List<ContaVO> contas = new ArrayList<ContaVO>();
-        Connection con = null;
-        Statement stm = null;
-        ResultSet rs = null;
-
-        try {
-
-            String sql = "SELECT * FROM CONTA";
-            con = ds.getConnection();
-            stm = con.createStatement();
-            rs = stm.executeQuery(sql);
-
-            while (rs.next()) {
-                ContaVO conta = new ContaVO();
-                populaConta(conta, rs);
-                contas.add(conta);
-            }
-
-        } catch (SQLException ex) {
-            System.err.println("ERRO NA CONSULTA");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                rs.close();
-                stm.close();
-                con.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA CONSULTA DE CONTAS");
-                throw new SQLException(ex);
-            }
-        }
-
-        return contas;
-
-    }
+    @PersistenceContext
+    EntityManager manager;
 
     //Insere uma nova conta na base de dados
-    public ContaVO insertConta(ContaVO conta) throws ContaException, SQLException {
-
-        Connection conn = null;
-        PreparedStatement pstm = null;
-        ResultSet rs = null;
-
-        try {
-            
-            String sql = "INSERT INTO CONTA (NOME, DATA, VALOR, TIPOLANCAMENTO) VALUES (?, ?, ?, ?)";
-            conn = ds.getConnection();
-            pstm = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pstm.setString(1, conta.getNome());
-            pstm.setString(2, conta.getData());
-            pstm.setDouble(3, conta.getValor());
-            pstm.setString(4, conta.getTipoLancamento().toString());
-            pstm.execute();
-            rs = pstm.getGeneratedKeys();
-
-            if (rs.next()) {
-                conta.setId(rs.getInt("id"));
-            }
-            
-        } catch (SQLException ex) {
-            System.err.println("ERRO NA INSERCAO");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                rs.close();
-                pstm.close();
-                conn.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA INSERCAO");
-                throw new SQLException(ex);
-            }
-        }
-
+    public ContaDTO insertConta(ContaDTO conta) {
+        
+        manager.persist(conta);
         return conta;
-
-    }
-
-    //apaga conta da base de dados
-    public void deleteConta(ContaVO conta) throws ContaException, SQLException {
-
-        Connection conn = null;
-        PreparedStatement pstm = null;
-
-        try {
-            
-            String sql = "DELETE FROM CONTA WHERE ID = ?";
-            conn = ds.getConnection();
-            pstm = conn.prepareStatement(sql);
-            pstm.setInt(1, conta.getId());
-            pstm.execute();
-
-        } catch (SQLException ex) {
-            System.err.println("ERRO NA REMOCAO");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                pstm.close();
-                conn.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA REMOCAO");
-                throw new SQLException(ex);
-            }
-
-        }
-
+        
     }
 
     //Atualiza conta na base de dados
-    public void updateConta(ContaVO conta) throws ContaException, SQLException {
+    public void updateConta(ContaDTO conta) {
+        
+        ContaDTO dto = manager.find(ContaDTO.class, conta.getId());
+        manager.merge(dto);
+        
+    }
 
-        Connection conn = null;
-        PreparedStatement pstm = null;
+    //apaga conta da base de dados
+    public void deleteConta(ContaVO conta) {
+        
+        ContaDTO dto = manager.find(ContaDTO.class, conta.getId());
+        manager.remove(dto);
+        
+    }
 
-        try {
-            
-            String sql = "UPDATE CONTA SET NOME = ?, DATA = ?, VALOR = ?, TIPOLANCAMENTO = ? WHERE ID = ?";
-            conn = ds.getConnection();
-            pstm = conn.prepareStatement(sql);
-            pstm.setString(1, conta.getNome());
-            pstm.setString(2, conta.getData());
-            pstm.setDouble(3, conta.getValor());
-            pstm.setString(4, conta.getTipoLancamento().toString());
-            pstm.setInt(5, conta.getId());
-            pstm.execute();
+    //Buscar todas as contas na base de dados
+    public List<ContaDTO> getContas() {
+        
+        String sql = "select c from conta c";
+        Query query = manager.createQuery(sql);
+        return query.getResultList();
+        
+    }
 
-        } catch (SQLException ex) {
-            System.err.println("ERRO NA ATUALIZACAO");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                pstm.close();
-                conn.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA ATUALIZACAO");
-                throw new SQLException(ex);
-            }
-
-        }
-
+    //Buscar conta por ID na base de dados
+    public ContaDTO getConta(int id) {
+        
+        return manager.find(ContaDTO.class, id);
+        
     }
 
     //busca conta na base de dados pelo nome (ou parte dele)
     //A consulta não é case sensitive, porém deve-se respeitar a acentuacao
-    public List<ContaVO> getContaPorNome(ContaVO c) throws ContaException, SQLException {
+    public List<ContaDTO> getContaPorNome(ContaDTO conta) {
 
-        List<ContaVO> contas = new ArrayList<>();
-        Connection conn = null;
-        Statement stm = null;
-        ResultSet rs = null;
-
-        try {
-            
-            String sql = "SELECT * FROM CONTA WHERE UPPER(NOME) LIKE '%" + c.getNome().toUpperCase() + "%'";
-            conn = ds.getConnection();
-            stm = conn.createStatement();
-            rs = stm.executeQuery(sql);
-
-            while (rs.next()) {
-                ContaVO conta = new ContaVO();
-                populaConta(conta, rs);
-                contas.add(conta);
-            }
-
-        } catch (SQLException ex) {
-            System.err.println("ERRO NA CONSULTA POR NOME");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                rs.close();
-                stm.close();
-                conn.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA CONSULTA POR NOME");
-                throw new SQLException(ex);
-            }
-
-        }
-
-        return contas;
+        String sql = "select c from conta c where upper(c.nome) like '%" + conta.getNome().toUpperCase() + "%'";
+        Query query = manager.createQuery(sql);
+        return query.getResultList();
 
     }
 
-//Buscando Contas por periodo de vencimento (DATA)
-    public List<ContaVO> getContaPorVencimento(ContaVencimentoVO vencimentos) throws ContaException, SQLException {
+    //Buscando Contas por periodo de vencimento (DATA)
+    public List<ContaDTO> getContaPorVencimento(ContaVencimentoVO vencimentos) {
 
-        List<ContaVO> contas = new ArrayList<ContaVO>();
-        Connection conn = null;
-        PreparedStatement pstm = null;
-        ResultSet rs = null;
+        String sql = "select c from conta c where c.data between :pDataInicial and :pDataFinal ";
+        Query query = manager.createQuery(sql);
+        query.setParameter("pDataInicial", vencimentos.getVencimentoInicial());
+        query.setParameter("pDataFinal", vencimentos.getVencimentoFinal());
+        return query.getResultList();
 
-        try {
-            
-            String sql = "SELECT * FROM CONTA WHERE DATA BETWEEN ? AND ? ";
-            conn = ds.getConnection();
-            pstm = conn.prepareStatement(sql);
-            pstm.setString(1, vencimentos.getVencimentoInicial());
-            pstm.setString(2, vencimentos.getVencimentoFinal());
-            rs = pstm.executeQuery();
-
-            while (rs.next()) {
-                ContaVO conta = new ContaVO();
-                populaConta(conta, rs);
-                contas.add(conta);
-            }
-        } catch (SQLException ex) {
-            System.err.println("ERRO NA CONSULTA POR VENCIMENTO");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                rs.close();
-                pstm.close();
-                conn.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA CONSULTA POR VENCIMENTO");
-                throw new SQLException(ex);
-            }
-
-        }
-
-        return contas;
     }
 
     //Buscando Contas por periodo de vencimento (ANO / MES)
-    public List<ContaVO> getContaPorAnoMes(ContaVencimentoVO vencimentos) throws ContaException, SQLException {
+    public List<ContaDTO> getContaPorAnoMes(ContaVencimentoVO vencimentos) {
 
-        String dataPesquisa = gerarDataPesquisa(vencimentos);
-        List<ContaVO> contas = new ArrayList<ContaVO>();
-        Connection conn = null;
-        Statement stm = null;
-        ResultSet rs = null;
+        String dataPesquisa = geraDataPesquisa(vencimentos);
+        String sql = "select c from conta c where c.data like '%" + dataPesquisa + "%'";
+        Query query = manager.createQuery(sql);
+        return query.getResultList();
 
-        try {
-
-            String sql = "SELECT * FROM CONTA WHERE DATA LIKE '%" + dataPesquisa + "%'";
-            conn = ds.getConnection();
-            stm = conn.createStatement();
-            rs = stm.executeQuery(sql);
-
-            while (rs.next()) {
-                ContaVO conta = new ContaVO();
-                populaConta(conta, rs);
-                contas.add(conta);
-            }
-
-        } catch (SQLException ex) {
-            System.err.println("ERRO NA CONSULTA POR ANO/MES");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                rs.close();
-                stm.close();
-                conn.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA CONSULTA POR ANO/MES");
-                throw new SQLException(ex);
-            }
-
-        }
-
-        return contas;
     }
 
     //Buscando Contas por Tipo de Lançamento
-    public List<ContaVO> getContaPorTipoLancamento(ContaVO c) throws ContaException, SQLException {
+    public List<ContaDTO> getContaPorTipoLancamento(ContaVO c) {
 
-        List<ContaVO> contas = new ArrayList<ContaVO>();
-        Connection conn = null;
-        Statement stm = null;
-        ResultSet rs = null;
+        String sql = "select c from conta c "
+                    + "join tipolancamento t"
+                    + "where t.id = :pTipoLancamentoID";
+        Query query = manager.createQuery(sql);
+        query.setParameter("pTipoLancamentoID", c.getTipoLancamento());
+        
+        return query.getResultList();
 
-        try {
-
-            String sql = "SELECT * FROM CONTA WHERE UPPER(TIPOLANCAMENTO) LIKE '%" + c.getTipoLancamento() + "%'";
-            conn = ds.getConnection();
-            stm = conn.createStatement();
-            rs = stm.executeQuery(sql);
-
-            while (rs.next()) {
-                ContaVO conta = new ContaVO();
-                populaConta(conta, rs);
-                contas.add(conta);
-            }
-        } catch (SQLException ex) {
-            System.err.println("ERRO NA CONSULTA POR TIPO DE LANCAMENTO");
-            throw new SQLException(ex);
-        } finally {
-            try {
-                rs.close();
-                stm.close();
-                conn.close();
-            } catch (SQLException ex) {
-                System.err.println("ERRO AO FECHAR NA CONSULTA POR TIPO DE LANCAMENTO");
-                throw new SQLException(ex);
-            }
-
-        }
-
-        return contas;
     }
 
-    /* 
-        Método para popular um objeto Conta com suas respectivas informações,
-        compartilhado entre os métodos desta classe 
-    */
-    private void populaConta(ContaVO conta, ResultSet res) throws SQLException {
-        conta.setId(res.getInt("id"));
-        conta.setNome(res.getString("nome"));
-        conta.setData(res.getString("data"));
-        conta.setValor(res.getDouble("valor"));
-        conta.setTipoLancamento(res.getString("tipolancamento"));
+    public TipoLancamentoDTO getTipoLancamento(Integer id) {
+        return manager.find(TipoLancamentoDTO.class, id);
     }
 
+    public List<TipoLancamentoDTO> getTiposLancamento(){
+        String sql = "select t from tipolancamento t";
+        Query query = manager.createQuery(sql);
+        return query.getResultList();
+    }
+    
+    public void insertTipoLancamento(List<TipoLancamentoDTO> lancamentos){
+        manager.persist(lancamentos);
+    }
+    
     /*
         Refatora as informações referente a data de consulta
         - Se informado apenas o ano retorna apenas o ano
-        - Se informado apenas o mes, contate o 0 (zero) se menor que 10 e acrescenta - (traço)
-        para não ocorrer garantir o retorno de conta do mês referente.
-    */
-    private String gerarDataPesquisa(ContaVencimentoVO vencimentos) {
-        
+        - Se informado apenas o mes, concatena o 0 (zero) se menor que 10 e acrescenta - (traço)
+        para garantir o retorno apenas de contas do mês referente.
+     */
+    private String geraDataPesquisa(ContaVencimentoVO vencimentos) {
+
         String dataPesquisa;
-        
+
         if (vencimentos.getMes() == 0) {
-            
+
             dataPesquisa = String.valueOf(vencimentos.getAno());
-            
+
         } else if (vencimentos.getAno() == 0) {
-            
+
             if (vencimentos.getMes() < 10) {
                 dataPesquisa = "-0" + String.valueOf(vencimentos.getMes()) + "-";
             } else {
                 dataPesquisa = "-" + String.valueOf(vencimentos.getMes()) + "-";
             }
-            
+
         } else {
-            
+
             if (vencimentos.getMes() < 10) {
                 dataPesquisa = String.valueOf(vencimentos.getAno()) + "-0" + String.valueOf(vencimentos.getMes());
             } else {
                 dataPesquisa = String.valueOf(vencimentos.getAno()) + "-" + String.valueOf(vencimentos.getMes());
             }
-            
 
         }
-        
+
         return dataPesquisa;
-        
+
     }
 
 }

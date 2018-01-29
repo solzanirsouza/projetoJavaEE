@@ -17,7 +17,6 @@ public class Constantes {
     public static final String NOMEOBRIGATORIO = "O campo nome é obrigatório";
     
     //Padrões
-    public static final String FORMATO_DATA = "yyyy-mm-dd";
-    public static final int ValorInteiroInicial = -1;
+    public static final String FORMATO_DATA = "yyyy-MM-dd";
     
 }

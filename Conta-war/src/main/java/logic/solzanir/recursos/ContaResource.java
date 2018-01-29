@@ -1,6 +1,5 @@
 package logic.solzanir.recursos;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -42,10 +41,7 @@ public class ContaResource {
         try {
 
             retorno = bean.buscaTodasContas();
-
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO CONSULTAR CONTAS: " + ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
@@ -66,9 +62,6 @@ public class ContaResource {
 
             retorno = bean.buscaContaPorID(id);
 
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO CONSULTAR CONTA POR ID: " + ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
@@ -90,9 +83,6 @@ public class ContaResource {
 
             resposta = bean.buscaContaPorNome(conta);
 
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO CONSULTAR CONTA POR NOME: " + ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
@@ -114,9 +104,6 @@ public class ContaResource {
 
             retorno = bean.buscaContaPorData(vencimentos);
 
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO CONSULTAR CONTA POR VENCIMENTO: " + ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
@@ -138,9 +125,6 @@ public class ContaResource {
             
             retorno = bean.buscaContaPorTipoLancamento(conta);
 
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO CONSULTAR CONTA POR TIPO DE LANCAMENTO: " + ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
@@ -160,10 +144,7 @@ public class ContaResource {
         try {
         
             retorno = bean.insereConta(conta);
-            
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO INSERIR NOVA CONTA: " + ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
@@ -181,10 +162,7 @@ public class ContaResource {
         try {
             
             bean.atualizaConta(conta);
-            
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO ATUALIZAR CONTA: " + ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
@@ -202,9 +180,6 @@ public class ContaResource {
 
             bean.removeConta(conta);
 
-        } catch (SQLException ex) {
-            System.err.println("ERRO AO REMOVER CONTA: " + ex.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();

@@ -28,9 +28,9 @@ import org.junit.runner.RunWith;
  * @author Solzanir Souza <souzanirs@gmail.com>
  * @date 07/01/2018
  */
-@RunWith(Arquillian.class)
+//@RunWith(Arquillian.class)
 public class TesteConta {
-
+/*
     @Deployment
     public static Archive<?> criarArquivoTeste() {
         Archive<?> arquivoTeste = ShrinkWrap.create(WebArchive.class, "aplicacaoTeste.jar")
@@ -171,5 +171,5 @@ public class TesteConta {
         }
         
     }
-
+*/
 }
