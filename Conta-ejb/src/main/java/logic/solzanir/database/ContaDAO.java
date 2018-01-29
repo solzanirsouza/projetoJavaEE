@@ -1,5 +1,8 @@
 package logic.solzanir.database;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -9,6 +12,7 @@ import logic.solzanir.modelos.ContaDTO;
 import logic.solzanir.modelos.ContaVO;
 import logic.solzanir.modelos.ContaVencimentoVO;
 import logic.solzanir.modelos.TipoLancamentoDTO;
+import logic.solzanir.util.Constantes;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -16,48 +20,54 @@ import logic.solzanir.modelos.TipoLancamentoDTO;
  */
 @Stateless
 public class ContaDAO {
-    
+
     @PersistenceContext
     EntityManager manager;
 
     //Insere uma nova conta na base de dados
     public ContaDTO insertConta(ContaDTO conta) {
-        
+
         manager.persist(conta);
         return conta;
-        
+
     }
 
     //Atualiza conta na base de dados
-    public void updateConta(ContaDTO conta) {
-        
+    public ContaDTO updateConta(ContaDTO conta) {
+
         ContaDTO dto = manager.find(ContaDTO.class, conta.getId());
-        manager.merge(dto);
-        
+        if (dto != null) {
+            dto = conta;
+            manager.merge(dto);
+        }
+        return dto;
+
     }
 
     //apaga conta da base de dados
     public void deleteConta(ContaVO conta) {
-        
+
         ContaDTO dto = manager.find(ContaDTO.class, conta.getId());
-        manager.remove(dto);
-        
+        if (dto != null) {
+            manager.remove(dto);
+        }
+
     }
 
     //Buscar todas as contas na base de dados
     public List<ContaDTO> getContas() {
-        
+
         String sql = "select c from conta c";
         Query query = manager.createQuery(sql);
         return query.getResultList();
-        
+
     }
 
     //Buscar conta por ID na base de dados
     public ContaDTO getConta(int id) {
-        
+
         return manager.find(ContaDTO.class, id);
-        
+
     }
 
     //busca conta na base de dados pelo nome (ou parte dele)
@@ -71,12 +81,19 @@ public class ContaDAO {
     }
 
     //Buscando Contas por periodo de vencimento (DATA)
-    public List<ContaDTO> getContaPorVencimento(ContaVencimentoVO vencimentos) {
+    public List<ContaDTO> getContaPorVencimento(ContaVencimentoVO vencimentos) throws ParseException {
 
+        Calendar dataInicial = Calendar.getInstance();
+        Calendar dataFinal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat(Constantes.FORMATO_DATA);
+        
+        dataInicial.setTime(sdf.parse(vencimentos.getVencimentoInicial()));
+        dataFinal.setTime(sdf.parse(vencimentos.getVencimentoFinal()));
+        
         String sql = "select c from conta c where c.data between :pDataInicial and :pDataFinal ";
         Query query = manager.createQuery(sql);
-        query.setParameter("pDataInicial", vencimentos.getVencimentoInicial());
-        query.setParameter("pDataFinal", vencimentos.getVencimentoFinal());
+        query.setParameter("pDataInicial", dataInicial);
+        query.setParameter("pDataFinal", dataFinal);
         return query.getResultList();
 
     }
@@ -94,12 +111,9 @@ public class ContaDAO {
     //Buscando Contas por Tipo de Lançamento
     public List<ContaDTO> getContaPorTipoLancamento(ContaVO c) {
 
-        String sql = "select c from conta c "
-                    + "join tipolancamento t"
-                    + "where t.id = :pTipoLancamentoID";
+        String sql = "select c from conta c where tipolancamento_id = :pTipoLancamentoID";
         Query query = manager.createQuery(sql);
         query.setParameter("pTipoLancamentoID", c.getTipoLancamento());
-        
         return query.getResultList();
 
     }
@@ -108,16 +122,16 @@ public class ContaDAO {
         return manager.find(TipoLancamentoDTO.class, id);
     }
 
-    public List<TipoLancamentoDTO> getTiposLancamento(){
+    public List<TipoLancamentoDTO> getTiposLancamento() {
         String sql = "select t from tipolancamento t";
         Query query = manager.createQuery(sql);
         return query.getResultList();
     }
-    
-    public void insertTipoLancamento(List<TipoLancamentoDTO> lancamentos){
+
+    public void insertTipoLancamento(List<TipoLancamentoDTO> lancamentos) {
         manager.persist(lancamentos);
     }
-    
+
     /*
         Refatora as informações referente a data de consulta
         - Se informado apenas o ano retorna apenas o ano

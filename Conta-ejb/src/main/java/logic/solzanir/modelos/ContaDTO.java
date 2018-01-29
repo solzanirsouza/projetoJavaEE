@@ -3,6 +3,7 @@ package logic.solzanir.modelos;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,6 +29,8 @@ public class ContaDTO implements Serializable {
     private TipoLancamentoDTO tipoLancamento;
 
     private String nome;
+    
+   @Column(columnDefinition="Decimal(10,2) default '0.00'")
     private BigDecimal valor;
 
     public Integer getId() {

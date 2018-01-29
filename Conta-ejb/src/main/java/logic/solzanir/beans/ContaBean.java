@@ -39,10 +39,12 @@ public class ContaBean {
     }
 
     @Transactional
-    public void atualizaConta(ContaVO conta) throws ContaException {
+    public ContaVO atualizaConta(ContaVO conta) throws ContaException {
 
         ContaDTO dto = convertContaDTO(conta);
-        dao.updateConta(dto);
+        dto = dao.updateConta(dto);
+        conta = convertContaVO(dto);
+        return conta;
 
     }
 
@@ -79,7 +81,8 @@ public class ContaBean {
     public List<ContaVO> buscaContaPorNome(ContaVO conta) throws ContaException {
 
         List<ContaVO> contas = new ArrayList<>();
-        ContaDTO dto = convertContaDTO(conta);
+        ContaDTO dto = new ContaDTO();
+        dto.setNome(conta.getNome());
 
         for (ContaDTO contaDTO : dao.getContaPorNome(dto)) {
             ContaVO c = convertContaVO(contaDTO);
@@ -95,33 +98,49 @@ public class ContaBean {
 
         List<ContaVO> contas = new ArrayList<>();
 
-        /*
+        try {
+
+            /*
             Se o cliente informar um Ano ou Mes a consulta considera estes campos,
             se não considera a data informada, se não informada data final
             repete-se a data inicial
-         */
-        if (vencimento.getAno() != 0 || vencimento.getMes() != 0) {
+             */
+            if (vencimento.getAno() != 0 || vencimento.getMes() != 0) {
 
-            for (ContaDTO dto : dao.getContaPorAnoMes(vencimento)) {
-                ContaVO conta = convertContaVO(dto);
-                contas.add(conta);
-            }
+                for (ContaDTO dto : dao.getContaPorAnoMes(vencimento)) {
+                    ContaVO conta = convertContaVO(dto);
+                    contas.add(conta);
+                }
 
-            return contas;
-
-        } else {
-
-            if (vencimento.getVencimentoFinal() == null || vencimento.getVencimentoFinal().equals("")) {
-                vencimento.setVencimentoFinal(vencimento.getVencimentoInicial());
             } else {
-                ordenaDatas(vencimento);
+
+                if (vencimento.getVencimentoFinal() == null) {
+
+                    if (vencimento.getVencimentoInicial() == null) {
+                        throw new ContaException(Constantes.DATAINVALIDA);
+                    } else {
+                        vencimento.setVencimentoFinal(vencimento.getVencimentoInicial());
+                    }
+
+                } else {
+
+                    if (vencimento.getVencimentoInicial() == null) {
+                        vencimento.setVencimentoInicial(vencimento.getVencimentoFinal());
+                    } else {
+                        ordenaDatas(vencimento);
+                    }
+                    
+                }
+
+                for (ContaDTO dto : dao.getContaPorVencimento(vencimento)) {
+                    ContaVO conta = convertContaVO(dto);
+                    contas.add(conta);
+                }
+
             }
 
-        }
-
-        for (ContaDTO dto : dao.getContaPorAnoMes(vencimento)) {
-            ContaVO conta = convertContaVO(dto);
-            contas.add(conta);
+        } catch (ParseException ex) {
+            throw new ContaException(Constantes.DATAINVALIDA);
         }
 
         return contas;
@@ -132,15 +151,15 @@ public class ContaBean {
     public List<ContaVO> buscaContaPorTipoLancamento(ContaVO conta) throws ContaException {
 
         List<ContaVO> contas = new ArrayList<>();
-        List<ContaDTO> contasDTO =  dao.getContaPorTipoLancamento(conta);
-        
-        for (ContaDTO dto : contasDTO){
+        List<ContaDTO> contasDTO = dao.getContaPorTipoLancamento(conta);
+
+        for (ContaDTO dto : contasDTO) {
             conta = convertContaVO(dto);
             contas.add(conta);
         }
 
         return contas;
-        
+
     }
 
     /*
@@ -158,7 +177,7 @@ public class ContaBean {
                 vencimento.setVencimentoInicial(vencimento.getVencimentoFinal());
                 vencimento.setVencimentoFinal(aux);
             }
-        } catch (ParseException ex) {
+        } catch (ParseException | NullPointerException ex) {
             System.err.println("Erro conversao data:" + ex.getMessage());
             throw new ContaException(Constantes.DATAINVALIDA);
         }
@@ -170,9 +189,9 @@ public class ContaBean {
         Calendar calendar = Calendar.getInstance();
 
         try {
-            
+
             calendar.setTime(sdf.parse(c.getData()));
-            
+
             if (c.getId() > 0) {
                 conta.setId(c.getId());
             }
@@ -185,22 +204,26 @@ public class ContaBean {
             System.err.println("Erro conversao data:" + ex.getMessage());
             throw new ContaException(Constantes.DATAINVALIDA);
         }
-        
+
         return conta;
-        
+
     }
 
     private ContaVO convertContaVO(ContaDTO dto) {
 
-        Date date = dto.getData().getTime();
-        String dataConta = sdf.format(date);
-
         ContaVO conta = new ContaVO();
-        conta.setId(dto.getId());
-        conta.setNome(dto.getNome());
-        conta.setData(dataConta);
-        conta.setTipoLancamento(dto.getTipoLancamento().getId());
-        conta.setValor(Double.valueOf(dto.getValor().toString()));
+
+        if (dto != null) {
+            Date date = dto.getData().getTime();
+            String dataConta = sdf.format(date);
+
+            conta.setId(dto.getId());
+            conta.setNome(dto.getNome());
+            conta.setData(dataConta);
+            conta.setTipoLancamento(dto.getTipoLancamento().getId());
+            conta.setValor(Double.valueOf(dto.getValor().toString()));
+        }
+
         return conta;
 
     }

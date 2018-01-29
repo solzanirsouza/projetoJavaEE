@@ -161,7 +161,7 @@ public class ContaResource {
         
         try {
             
-            bean.atualizaConta(conta);
+            conta = bean.atualizaConta(conta);
 
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
