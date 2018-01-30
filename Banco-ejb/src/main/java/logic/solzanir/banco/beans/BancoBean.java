@@ -1,30 +1,34 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package logic.solzanir.banco.beans;
 
-import java.math.BigDecimal;
 import javax.ejb.Asynchronous;
 import javax.enterprise.event.Observes;
-import javax.enterprise.event.Reception;
-import javax.inject.Named;
-import logic.solzanir.banco.eventos.BancoEvent;
+import javax.inject.Inject;
+import logic.solzanir.banco.database.BancoDAO;
+import logic.solzanir.banco.gestao.GestaoBanco;
+import logic.solzanir.banco.models.BancoDTO;
+import logic.solzanir.banco.models.BancoVO;
 
 /**
- *
- * @author martin
+ * @author Solzanir Souza <souzanirs@gmail.com>
+ * @date   30/01/2018
  */
-@Named
 public class BancoBean {
 
-    private BigDecimal saldo = BigDecimal.ZERO;
+    @Inject
+    private BancoDAO dao;
+
+    @Inject
+    private GestaoBanco gestao;
     
     @Asynchronous
-    public void gravaMovimentacaoBanco(@Observes(notifyObserver = Reception.ALWAYS) BancoEvent evento){
-        saldo = saldo.add(evento.getValor());
-        System.out.println("Nova Movimentação no banco: \n" + evento);
-        System.out.println("SALDO ATUAL: " + saldo);
+    public void gravaMovimentacaoBanco(@Observes BancoVO banco) {
+        
+        BancoDTO dto = new BancoDTO();
+        dto.setId(1);
+        dto.setSaldo(banco.getValor());
+        dao.incrementaSaldo(dto);
+        gestao.addConta(banco);
+        
     }
     
 }

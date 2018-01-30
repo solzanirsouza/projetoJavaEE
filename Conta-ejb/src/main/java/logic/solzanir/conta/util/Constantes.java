@@ -12,7 +12,7 @@ public class Constantes {
     public static final String ANOINVALIDO = "Verifique o ano informado";
     public static final String MESOBRIGATORIO = "O campo mês é obrigatório";
     public static final String DATAOBRIGATORIO = "O campo data é obrigatório";
-    public static final String TIPOLANCAMENTOOBRIGATORIO = "O campo tipo de lancamento é obrigatório";
+    public static final String TIPOLANCAMENTOOBRIGATORIO = "Não foi informado o tipoLancamento ou o valor não é valido";
     public static final String VALOROBRIGATORIO = "O campo valor é obrigatório";
     public static final String NOMEOBRIGATORIO = "O campo nome é obrigatório";
     

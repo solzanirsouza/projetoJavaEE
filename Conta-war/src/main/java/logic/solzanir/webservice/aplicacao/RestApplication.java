@@ -1,10 +1,10 @@
-package logic.solzanir.aplicacao;
+package logic.solzanir.webservice.aplicacao;
 
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
-import logic.solzanir.recursos.ContaResource;
+import logic.solzanir.webservice.recursos.ContaResource;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>

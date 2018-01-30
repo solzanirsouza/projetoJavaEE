@@ -1,4 +1,4 @@
-package logic.solzanir.recursos;
+package logic.solzanir.webservice.recursos;
 
 import java.util.ArrayList;
 import java.util.List;

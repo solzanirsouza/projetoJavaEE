@@ -10,7 +10,7 @@ import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import logic.solzanir.banco.eventos.BancoEvent;
+import logic.solzanir.banco.models.BancoVO;
 import logic.solzanir.conta.excecoes.ContaException;
 import logic.solzanir.conta.modelos.ContaVO;
 import logic.solzanir.conta.modelos.ContaVencimentoVO;
@@ -29,7 +29,7 @@ public class ContaBean {
     private ContaDAO dao;
 
     @Inject
-    private Event<BancoEvent> event;
+    private Event<BancoVO> event;
 
     SimpleDateFormat sdf = new SimpleDateFormat(Constantes.FORMATO_DATA);
 
@@ -37,14 +37,15 @@ public class ContaBean {
     public ContaVO insereConta(ContaVO conta) throws ContaException {
 
         ContaDTO dto = convertContaDTO(conta);
+        validaConta(dto);
         dto = dao.insertConta(dto);
 
         if (dto.getTipoLancamento().isBanco()) {
-            BancoEvent banco = new BancoEvent();
+            BancoVO banco = new BancoVO();
             criaBanco(banco, dto);
             event.fire(banco);
         }
-        
+
         conta = convertContaVO(dto);
         return conta;
 
@@ -239,12 +240,37 @@ public class ContaBean {
         return conta;
 
     }
-    
-    private void criaBanco(BancoEvent banco, ContaDTO dto) {
-        banco.setConta(dto.getNome());
-        banco.setData(dto.getData());
+
+    private void validaConta(ContaDTO conta) throws ContaException {
+
+        if (conta.getNome().isEmpty()) {
+            throw new ContaException(Constantes.NOMEOBRIGATORIO);
+        }
+
+        if (conta.getTipoLancamento() == null) {
+            throw new ContaException(Constantes.TIPOLANCAMENTOOBRIGATORIO);
+        }
+
+        if (conta.getData().getTime() == null) {
+            throw new ContaException(Constantes.DATAOBRIGATORIO);
+        }
+
+        if (conta.getValor().doubleValue() <= 0) {
+            throw new ContaException(Constantes.VALOROBRIGATORIO);
+        }
+
+    }
+
+    private void criaBanco(BancoVO banco, ContaDTO dto) {
+
+        Date date = dto.getData().getTime();
+        String dataConta = sdf.format(date);
+
+        banco.setNome(dto.getNome());
+        banco.setData(dataConta);
         banco.setTipoLancamento(dto.getTipoLancamento().getTipoLancamento());
         banco.setValor(dto.getValor());
+        
     }
-    
+
 }

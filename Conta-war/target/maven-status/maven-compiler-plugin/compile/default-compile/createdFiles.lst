@@ -1,2 +1,2 @@
-logic/solzanir/aplicacao/RestApplication.class
-logic/solzanir/recursos/ContaResource.class
+logic/solzanir/webservice/aplicacao/RestApplication.class
+logic/solzanir/webservice/recursos/ContaResource.class

@@ -5,9 +5,10 @@
     <jta-data-source>java:jboss/datasources/HSQLDS</jta-data-source>
     <class>logic.solzanir.conta.modelos.ContaDTO</class>
     <class>logic.solzanir.conta.modelos.TipoLancamentoDTO</class>
+    <class>logic.solzanir.banco.models.BancoDTO</class>
     <properties>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
-      <property name="hibernate.show_sql" value="true"/>
+      <property name="hibernate.show_sql" value="false"/>
       <property name="hibernate.format_sql" value="true"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
     </properties>
