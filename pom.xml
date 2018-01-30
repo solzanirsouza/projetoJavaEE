@@ -10,5 +10,6 @@
     <module>Conta-ejb</module>
     <module>Conta-war</module>
     <module>Conta-ear</module>
+    <module>Banco-ejb</module>
   </modules>
 </project>

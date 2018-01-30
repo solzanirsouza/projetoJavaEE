@@ -13,11 +13,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import logic.solzanir.excecoes.ContaException;
-import logic.solzanir.modelos.ContaVO;
-import logic.solzanir.modelos.ContaVencimentoVO;
-import logic.solzanir.modelos.MensagemResponse;
-import logic.solzanir.beans.ContaBean;
+import logic.solzanir.conta.excecoes.ContaException;
+import logic.solzanir.conta.modelos.ContaVO;
+import logic.solzanir.conta.modelos.ContaVencimentoVO;
+import logic.solzanir.conta.modelos.MensagemResponse;
+import logic.solzanir.conta.beans.ContaBean;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
