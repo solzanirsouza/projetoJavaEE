@@ -2,7 +2,7 @@ package logic.solzanir.banco.gestao;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.inject.Singleton;
+import javax.ejb.Singleton;
 import logic.solzanir.banco.models.BancoVO;
 
 /**
@@ -16,6 +16,10 @@ public class GestaoBanco {
     
     public void addConta(BancoVO conta){
         contasBanco.add(conta);
+    }
+    
+    public List<BancoVO> getBanco(){
+        return contasBanco;
     }
     
 }

@@ -11,5 +11,6 @@
     <module>Conta-war</module>
     <module>Conta-ear</module>
     <module>Banco-ejb</module>
+    <module>Agendador-ejb</module>
   </modules>
 </project>
