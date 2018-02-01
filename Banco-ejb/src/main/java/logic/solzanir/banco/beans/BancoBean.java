@@ -1,6 +1,7 @@
 package logic.solzanir.banco.beans;
 
 import javax.ejb.Asynchronous;
+import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import logic.solzanir.banco.database.BancoDAO;
