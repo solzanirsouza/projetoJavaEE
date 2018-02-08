@@ -2,8 +2,8 @@ package logic.solzanir.banco.gestao;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.ejb.Singleton;
-import logic.solzanir.banco.models.BancoVO;
+import javax.inject.Singleton;
+import logic.solzanir.conta.models.Conta;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -12,13 +12,13 @@ import logic.solzanir.banco.models.BancoVO;
 @Singleton
 public class GestaoBanco {
 
-    List<BancoVO> contasBanco = new ArrayList<>();
+    List<Conta> contasBanco = new ArrayList<>();
     
-    public void addConta(BancoVO conta){
+    public void addConta(Conta conta){
         contasBanco.add(conta);
     }
     
-    public List<BancoVO> getBanco(){
+    public List<Conta> getBanco(){
         return contasBanco;
     }
     

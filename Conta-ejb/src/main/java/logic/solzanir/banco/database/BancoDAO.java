@@ -1,11 +1,10 @@
 package logic.solzanir.banco.database;
 
-import java.math.BigDecimal;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
-import logic.solzanir.banco.models.BancoDTO;
+import logic.solzanir.banco.models.Banco;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -16,27 +15,32 @@ public class BancoDAO {
 
     @PersistenceContext
     private EntityManager manager;
+    
+    private Double saldo = 0.00;
 
     @Transactional
-    public void incrementaSaldo(BancoDTO evento) {
+    public void incrementaSaldo(Double valor) {
 
-        BigDecimal saldo = BigDecimal.ZERO;
-        BancoDTO banco = manager.find(BancoDTO.class, evento.getId());
+        Banco banco = manager.find(Banco.class, 1);
 
         if (banco == null) {
-            manager.persist(evento);
+            banco = new Banco();
+            banco.setId(1);
+            banco.setSaldo(valor);
+            manager.persist(banco);
         } else {
             saldo = banco.getSaldo();
-            saldo = saldo.add(evento.getSaldo());
+            saldo += valor;
             banco.setSaldo(saldo);
+            manager.merge(banco);
         }
 
     }
 
     @Transactional
-    public BigDecimal getSaldo() {
+    public Double getSaldo() {
 
-        BancoDTO banco = manager.find(BancoDTO.class, 1);
+        Banco banco = manager.find(Banco.class, 1);
         return banco.getSaldo();
 
     }

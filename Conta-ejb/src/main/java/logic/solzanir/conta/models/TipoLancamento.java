@@ -1,4 +1,4 @@
-package logic.solzanir.conta.modelos;
+package logic.solzanir.conta.models;
 
 import java.io.Serializable;
 import javax.persistence.Entity;
@@ -11,7 +11,7 @@ import javax.persistence.Id;
  * @date   26/01/2018
  */
 @Entity(name = "tipolancamento")
-public class TipoLancamentoDTO implements Serializable {
+public class TipoLancamento implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,20 +1,18 @@
 package logic.solzanir.conta.teste;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import junit.framework.Assert;
-import logic.solzanir.banco.models.BancoVO;
-import logic.solzanir.conta.excecoes.ContaException;
-import logic.solzanir.conta.modelos.ContaVO;
+import logic.solzanir.banco.models.Banco;
+import logic.solzanir.conta.exception.ContaException;
 import logic.solzanir.conta.beans.ContaBean;
 import logic.solzanir.conta.database.ContaDAO;
-import logic.solzanir.conta.modelos.ContaDTO;
-import logic.solzanir.conta.modelos.ContaVencimentoVO;
-import logic.solzanir.conta.modelos.TipoLancamentoDTO;
+import logic.solzanir.conta.models.Conta;
+import logic.solzanir.conta.models.ContaVencimento;
+import logic.solzanir.conta.models.TipoLancamento;
 import logic.solzanir.conta.util.Constantes;
-import logic.solzanir.conta.util.TipoLancamentoEnum;
-import logic.solzanir.conta.util.ValidadorData;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -34,112 +32,87 @@ public class TesteConta {
     @Inject
     private ContaBean bean;
 
-    private ContaVO conta;
-    
-    private final String dataConta = "1900-01-01";
+    private Conta conta;
+
+    private final Date dataConta = new Date(System.currentTimeMillis());
 
     @Deployment
     public static JavaArchive criarArquivoTeste() {
         return ShrinkWrap.create(JavaArchive.class)
                 .addClasses(ContaBean.class,
                         ContaDAO.class,
-                        ValidadorData.class,
                         ContaException.class,
-                        ContaVO.class,
-                        ContaDTO.class,
-                        TipoLancamentoDTO.class,
-                        ContaVencimentoVO.class,
-                        TipoLancamentoEnum.class,
+                        Conta.class,
+                        TipoLancamento.class,
+                        ContaVencimento.class,
                         Constantes.class,
-                        BancoVO.class)
+                        Banco.class)
                 .addAsResource("META-INF/persistence.xml")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 
     public TesteConta() {
-        this.conta = new ContaVO();
+
+        TipoLancamento tipoLancamento = new TipoLancamento();
+        tipoLancamento.setId(3);
+        
+        conta = new Conta();
         conta.setNome("TESTE");
         conta.setData(dataConta);
-        conta.setValor(999);
-        conta.setTipoLancamento(1);
+        conta.setValor(999.99);
+        conta.setTipoLancamento(tipoLancamento);
+
     }
 
     @Test
     @InSequence(1)
-    public void testaInsercaoDeConta() {
-
-        System.out.println("[TESTANDO INSERCAO DE CONTA]");
+    public void testarInsercaoDeContaNova() {
 
         try {
 
-            conta = bean.insereConta(conta);
+            conta = bean.insertConta(conta);
             Assert.assertTrue(conta.getId() > 0);
             bean.removeConta(conta);
 
         } catch (ContaException ex) {
-            System.err.println("[ERRO TESTE CONTA]: " + ex.getMensagem());
+            //Implementar LOGGER
         }
 
     }
 
     @Test
     @InSequence(2)
-    public void testaAtualizacaoDeConta() {
+    public void testarAtualizacaoDeConta() throws ContaException {
 
-        System.out.println("[TESTANDO ATUALIZACAO DE CONTA]");
-
-        try {
-
-            String nomeConta = "CONTA ATUALIZADA";
-            conta = bean.insereConta(conta);
-            conta.setNome(nomeConta);
-            bean.atualizaConta(conta);
-            ContaVO contaRetorno = bean.buscaContaPorID(conta.getId());
-            Assert.assertTrue(contaRetorno.getNome().equals(nomeConta));
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            System.err.println("[ERRO]: " + ex.getMensagem());
-        }
+        String nomeConta = "CONTA ATUALIZADA";
+        conta = bean.insertConta(conta);
+        conta.setNome(nomeConta);
+        bean.updateConta(conta);
+        Conta contaRetorno = bean.findContaById(conta.getId());
+        Assert.assertTrue(contaRetorno.getNome().equals(nomeConta));
+        bean.removeConta(conta);
 
     }
 
     @Test
     @InSequence(3)
-    public void testaRemocaoDeConta() {
+    public void testaRemocaoDeConta() throws ContaException {
 
-        System.out.println("[TESTANDO REMOCAO DE CONTA]");
-
-        try {
-
-            conta = bean.insereConta(conta);
-            Assert.assertTrue(conta.getId() > 0);
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            System.err.println("[ERRO TESTE CONTA]: " + ex.getMensagem());
-        }
+        conta = bean.insertConta(conta);
+        Assert.assertTrue(conta.getId() > 0);
+        bean.removeConta(conta);
 
     }
 
     @Test
     @InSequence(4)
-    public void testaConsultaDeContas() {
+    public void testaConsultaDeContas() throws ContaException {
 
-        System.out.println("[TESTANDO CONSULTA DE CONTAS]");
-
-        try {
-
-            List<ContaVO> contas = new ArrayList<>();
-            
-            conta = bean.insereConta(conta);
-            contas = bean.buscaTodasContas();
-            Assert.assertTrue(contas.size() > 0);
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            System.err.println("[ERRO]: " + ex.getMensagem());
-        }
+        List<Conta> contas = new ArrayList<>();
+        conta = bean.insertConta(conta);
+        contas = bean.findAllConta();
+        Assert.assertTrue(contas.size() > 0);
+        bean.removeConta(conta);
 
     }
 
@@ -147,138 +120,94 @@ public class TesteConta {
     @InSequence(5)
     public void testaConsultaDeContaPorNome() throws ContaException {
 
-        System.out.println("[TESTANDO CONSULTA DE CONTAS POR NOME]");
+        List<Conta> contas = new ArrayList<>();
+        conta = bean.insertConta(conta);
+        contas = bean.findContaByName(conta);
 
-        try {
-
-            List<ContaVO> contas = new ArrayList<>();
-            
-            conta = bean.insereConta(conta);
-            contas = bean.buscaContaPorNome(conta);
-            
-            boolean valida = false;
-            for(ContaVO c : contas){
-                if(c.getId().equals(conta.getId())){
-                    valida = true;
-                }
+        boolean valida = false;
+        for (Conta c : contas) {
+            if (c.getId().equals(conta.getId())) {
+                valida = true;
             }
-            
-            Assert.assertTrue(valida);
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            System.err.println("[ERRO]: " + ex.getMensagem());
         }
+
+        Assert.assertTrue(valida);
+        bean.removeConta(conta);
 
     }
 
     @Test
     @InSequence(6)
-    public void testaConsultaDeContaPorID() {
+    public void testaConsultaDeContaPorID() throws ContaException {
 
-        System.out.println("[TESTANDO CONSULTA DE CONTA POR ID]");
-        
-        try {
-
-            conta = bean.insereConta(conta);
-            ContaVO contaRetorno = bean.buscaContaPorID(conta.getId());
-            Assert.assertTrue(contaRetorno.getNome().equals(conta.getNome()));
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            System.err.println("[ERRO]: " + ex.getMensagem());
-        }
+        conta = bean.insertConta(conta);
+        Conta contaRetorno = bean.findContaById(conta.getId());
+        Assert.assertTrue(contaRetorno.getNome().equals(conta.getNome()));
+        bean.removeConta(conta);
 
     }
 
     @Test
     @InSequence(7)
-    public void testaConsultaDeContaPorTipoLancamento() {
+    public void testaConsultaDeContaPorTipoLancamento() throws ContaException {
 
-        System.out.println("[TESTANDO CONSULTA DE CONTAS POR TIPO DE LANCAMENTO]");
-        
-        try {
+        List<Conta> contas = new ArrayList<>();
+        conta = bean.insertConta(conta);
+        contas = bean.findContaByTipoLancamento(conta);
+        boolean valida = false;
 
-            List<ContaVO> contas = new ArrayList<>();
-            
-            conta = bean.insereConta(conta);
-            contas = bean.buscaContaPorTipoLancamento(conta);
-            
-            boolean valida = false;
-            for(ContaVO c : contas){
-                if(c.getId().equals(conta.getId())){
-                    valida = true;
-                }
+        for (Conta c : contas) {
+            if (c.getId().equals(conta.getId())) {
+                valida = true;
             }
-            
-            Assert.assertTrue(valida);
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            System.err.println("[ERRO]: " + ex.getMensagem());
         }
+
+        Assert.assertTrue(valida);
+        bean.removeConta(conta);
 
     }
 
     @Test
     @InSequence(8)
-    public void testaConsultaDeContaPorVencimento() {
+    public void testaConsultaDeContaPorVencimento() throws ContaException {
 
-        System.out.println("[TESTANDO CONSULTA DE CONTAS POR DATA DE VENCIMENTO]");
-        
-        try {
+        List<Conta> contas = new ArrayList<>();
+        conta = bean.insertConta(conta);
+        ContaVencimento contaVencimento = new ContaVencimento();
+        contaVencimento.setVencimentoFinal(dataConta);
+        contas = bean.findContaByData(contaVencimento);
 
-            List<ContaVO> contas = new ArrayList<>();
-            
-            conta = bean.insereConta(conta);
-            ContaVencimentoVO contaVencimento = new ContaVencimentoVO();
-            contaVencimento.setVencimentoFinal(dataConta);
-            contas = bean.buscaContaPorData(contaVencimento);
-            
-            boolean valida = false;
-            for(ContaVO c : contas){
-                if(c.getId().equals(conta.getId())){
-                    valida = true;
-                }
+        boolean valida = false;
+        for (Conta c : contas) {
+            if (c.getId().equals(conta.getId())) {
+                valida = true;
             }
-            
-            Assert.assertTrue(valida);
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            System.err.println("[ERRO]: " + ex.getMensagem());
         }
+
+        Assert.assertTrue(valida);
+        bean.removeConta(conta);
 
     }
 
     @Test
     @InSequence(9)
-    public void testaConsultaDeContaPorAnoMes() {
+    public void testaConsultaDeContaPorAnoMes() throws ContaException {
 
-        System.out.println("[TESTANDO CONSULTA DE CONTAS POR ANO/MES]");
-        
-        try {
+        List<Conta> contas = new ArrayList<>();
+        conta = bean.insertConta(conta);
+        ContaVencimento contaVencimento = new ContaVencimento();
+        contaVencimento.setAno(2018);
+        contas = bean.findContaByData(contaVencimento);
 
-            List<ContaVO> contas = new ArrayList<>();
-            
-            conta = bean.insereConta(conta);
-            ContaVencimentoVO contaVencimento = new ContaVencimentoVO();
-            contaVencimento.setAno(1900);
-            contas = bean.buscaContaPorData(contaVencimento);
-            
-            boolean valida = false;
-            for(ContaVO c : contas){
-                if(c.getId().equals(conta.getId())){
-                    valida = true;
-                }
+        boolean valida = false;
+        for (Conta c : contas) {
+            if (c.getId().equals(conta.getId())) {
+                valida = true;
             }
-            
-            Assert.assertTrue(valida);
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            System.err.println("[ERRO]: " + ex.getMensagem());
         }
+
+        Assert.assertTrue(valida);
+        bean.removeConta(conta);
 
     }
 

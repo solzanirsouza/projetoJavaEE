@@ -1,12 +1,9 @@
-package logic.solzanir.conta.modelos;
-
-import javax.ejb.Stateless;
+package logic.solzanir.conta.models;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
  * @date 31/12/2017
  */
-@Stateless
 public class MensagemResponse {
 
     private String mensagem = "";

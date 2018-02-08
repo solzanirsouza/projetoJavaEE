@@ -6,13 +6,13 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import logic.solzanir.banco.database.BancoDAO;
 import logic.solzanir.banco.gestao.GestaoBanco;
-import logic.solzanir.banco.models.BancoDTO;
-import logic.solzanir.banco.models.BancoVO;
+import logic.solzanir.conta.models.Conta;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
  * @date   30/01/2018
  */
+@Stateless
 public class BancoBean {
 
     @Inject
@@ -22,13 +22,10 @@ public class BancoBean {
     private GestaoBanco gestao;
     
     @Asynchronous
-    public void gravaMovimentacaoBanco(@Observes BancoVO banco) {
+    public void gravaMovimentacaoBanco(@Observes Conta conta) {
         
-        BancoDTO dto = new BancoDTO();
-        dto.setId(1);
-        dto.setSaldo(banco.getValor());
-        dao.incrementaSaldo(dto);
-        gestao.addConta(banco);
+        dao.incrementaSaldo(conta.getValor());
+        gestao.addConta(conta);
         
     }
     

@@ -1,8 +1,7 @@
-package logic.solzanir.conta.modelos;
+package logic.solzanir.conta.models;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Calendar;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,22 +16,22 @@ import javax.persistence.TemporalType;
  * @date 14/12/2017
  */
 @Entity(name = "conta")
-public class ContaDTO implements Serializable {
+public class Conta implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Temporal(TemporalType.DATE)
-    private Calendar data;
+    private Date dataConta;
 
     @OneToOne
-    private TipoLancamentoDTO tipoLancamento;
+    private TipoLancamento tipoLancamento;
 
     private String nome;
     
    @Column(columnDefinition="Decimal(10,2) default '0.00'")
-    private BigDecimal valor;
+    private Double valor;
 
     public Integer getId() {
         return id;
@@ -50,37 +49,28 @@ public class ContaDTO implements Serializable {
         this.nome = nome;
     }
 
-    public Calendar getData() {
-        return data;
+    public Date getData() {
+        return dataConta;
     }
 
-    public void setData(Calendar data) {
-        this.data = data;
+    public void setData(Date data) {
+        this.dataConta = data;
     }
 
-    public BigDecimal getValor() {
+    public Double getValor() {
         return valor;
     }
 
     public void setValor(double valor) {
-        this.valor = BigDecimal.valueOf(valor);
+        this.valor = valor;
     }
 
-    public TipoLancamentoDTO getTipoLancamento() {
+    public TipoLancamento getTipoLancamento() {
         return tipoLancamento;
     }
 
-    public void setTipoLancamento(TipoLancamentoDTO tipoLancamento) {
+    public void setTipoLancamento(TipoLancamento tipoLancamento) {
         this.tipoLancamento = tipoLancamento;
-    }
-
-    @Override
-    public String toString() {
-        return "[Conta: " + nome
-                + ", Data: " + data
-                + ", Valor: " + valor
-                + ", Tipo Lançamento: " + tipoLancamento.getTipoLancamento()
-                + "]";
     }
 
 }

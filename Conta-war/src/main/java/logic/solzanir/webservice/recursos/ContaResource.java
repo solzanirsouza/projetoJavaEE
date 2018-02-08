@@ -13,11 +13,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import logic.solzanir.conta.excecoes.ContaException;
-import logic.solzanir.conta.modelos.ContaVO;
-import logic.solzanir.conta.modelos.ContaVencimentoVO;
-import logic.solzanir.conta.modelos.MensagemResponse;
+import logic.solzanir.conta.exception.ContaException;
+import logic.solzanir.conta.models.ContaVencimento;
+import logic.solzanir.conta.models.MensagemResponse;
 import logic.solzanir.conta.beans.ContaBean;
+import logic.solzanir.conta.models.Conta;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -36,17 +36,8 @@ public class ContaResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getContas() {
 
-        List<ContaVO> retorno = new ArrayList<>();
-
-        try {
-
-            retorno = bean.buscaTodasContas();
-            
-        } catch (ContaException ex) {
-            response.setMensagem(ex.getMensagem());
-            return Response.status(Response.Status.CONFLICT).entity(response).build();
-        }
-
+        List<Conta> retorno = new ArrayList<>();
+        retorno = bean.findAllConta();
         return Response.ok().entity(retorno).build();
 
     }
@@ -56,17 +47,7 @@ public class ContaResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getConta(@PathParam("id") Integer id) {
 
-        ContaVO retorno = new ContaVO();
-
-        try {
-
-            retorno = bean.buscaContaPorID(id);
-
-        } catch (ContaException ex) {
-            response.setMensagem(ex.getMensagem());
-            return Response.status(Response.Status.CONFLICT).entity(response).build();
-        }
-
+        Conta retorno = bean.findContaById(id);
         return Response.ok().entity(retorno).build();
 
     }
@@ -75,19 +56,10 @@ public class ContaResource {
     @Path("/pornome")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getContaPorNome(ContaVO conta) throws ContaException {
+    public Response getContaPorNome(Conta conta) throws ContaException {
 
-        List<ContaVO> resposta = new ArrayList<>();
-
-        try {
-
-            resposta = bean.buscaContaPorNome(conta);
-
-        } catch (ContaException ex) {
-            response.setMensagem(ex.getMensagem());
-            return Response.status(Response.Status.CONFLICT).entity(response).build();
-        }
-
+        List<Conta> resposta = new ArrayList<>();
+        resposta = bean.findContaByName(conta);
         return Response.ok().entity(resposta).build();
 
     }
@@ -96,19 +68,15 @@ public class ContaResource {
     @Path("/porvencimento")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getContaPorVencimento(ContaVencimentoVO vencimentos) {
+    public Response getContaPorVencimento(ContaVencimento vencimentos) {
 
-        List<ContaVO> retorno = new ArrayList<>();
-
+        List<Conta> retorno = new ArrayList<>();
         try {
-
-            retorno = bean.buscaContaPorData(vencimentos);
-
+            retorno = bean.findContaByData(vencimentos);
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
         }
-
         return Response.ok().entity(retorno).build();
 
     }
@@ -117,19 +85,10 @@ public class ContaResource {
     @Path("/porlancamento")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getContaPorTipoLacamento(ContaVO conta) throws ContaException {
+    public Response getContaPorTipoLacamento(Conta conta) throws ContaException {
 
-        List<ContaVO> retorno = new ArrayList<>();
-
-        try {
-            
-            retorno = bean.buscaContaPorTipoLancamento(conta);
-
-        } catch (ContaException ex) {
-            response.setMensagem(ex.getMensagem());
-            return Response.status(Response.Status.CONFLICT).entity(response).build();
-        }
-
+        List<Conta> retorno = new ArrayList<>();
+        retorno = bean.findContaByTipoLancamento(conta);
         return Response.ok().entity(retorno).build();
 
     }
@@ -137,19 +96,15 @@ public class ContaResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response insereConta(ContaVO conta) {
+    public Response insereConta(Conta conta) {
         
-        ContaVO retorno = new ContaVO();
-        
+        Conta retorno = new Conta();
         try {
-        
-            retorno = bean.insereConta(conta);
-
+            retorno = bean.insertConta(conta);
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
         }
-        
         return Response.status(Response.Status.CREATED).entity(retorno).build();
         
     }
@@ -157,34 +112,23 @@ public class ContaResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response atualizaConta(ContaVO conta) {
+    public Response atualizaConta(Conta conta) {
         
         try {
-            
-            conta = bean.atualizaConta(conta);
-
+            conta = bean.updateConta(conta);
         } catch (ContaException ex) {
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
         }
-        
         return Response.ok("Conta atualizada com sucesso").entity(conta).build();
         
     }
 
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeConta(ContaVO conta) {
+    public Response removeConta(Conta conta) {
         
-        try {
-
-            bean.removeConta(conta);
-
-        } catch (ContaException ex) {
-            response.setMensagem(ex.getMensagem());
-            return Response.status(Response.Status.CONFLICT).entity(response).build();
-        }
-
+        bean.removeConta(conta);
         return Response.ok("Conta removida com sucesso").build();
         
     }

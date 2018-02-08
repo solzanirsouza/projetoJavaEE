@@ -1,18 +1,13 @@
 package logic.solzanir.conta.database;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import logic.solzanir.conta.modelos.ContaDTO;
-import logic.solzanir.conta.modelos.ContaVO;
-import logic.solzanir.conta.modelos.ContaVencimentoVO;
-import logic.solzanir.conta.modelos.TipoLancamentoDTO;
-import logic.solzanir.conta.util.Constantes;
+import logic.solzanir.conta.models.Conta;
+import logic.solzanir.conta.models.ContaVencimento;
+import logic.solzanir.conta.models.TipoLancamento;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -25,37 +20,40 @@ public class ContaDAO {
     EntityManager manager;
 
     //Insere uma nova conta na base de dados
-    public ContaDTO insertConta(ContaDTO conta) {
+    public Conta insertConta(Conta conta) {
 
         manager.persist(conta);
+        conta.setTipoLancamento(getTipoLancamento(conta.getTipoLancamento().getId()));
         return conta;
 
     }
 
     //Atualiza conta na base de dados
-    public ContaDTO updateConta(ContaDTO conta) {
+    public Conta updateConta(Conta conta) {
 
-        ContaDTO dto = manager.find(ContaDTO.class, conta.getId());
-        if (dto != null) {
-            dto = conta;
-            manager.merge(dto);
+        Conta contadb = manager.find(Conta.class, conta.getId());
+        
+        if (contadb != null) {
+            contadb = conta;
+            manager.merge(contadb);
         }
-        return dto;
+        
+        return contadb;
 
     }
 
     //apaga conta da base de dados
-    public void deleteConta(ContaVO conta) {
+    public void deleteConta(Conta conta) {
 
-        ContaDTO dto = manager.find(ContaDTO.class, conta.getId());
-        if (dto != null) {
-            manager.remove(dto);
+        Conta contadb = manager.find(Conta.class, conta.getId());
+        if (contadb != null) {
+            manager.remove(contadb);
         }
 
     }
 
     //Buscar todas as contas na base de dados
-    public List<ContaDTO> getContas() {
+    public List<Conta> getContas() {
 
         String sql = "select c from conta c";
         Query query = manager.createQuery(sql);
@@ -64,15 +62,15 @@ public class ContaDAO {
     }
 
     //Buscar conta por ID na base de dados
-    public ContaDTO getConta(int id) {
+    public Conta getConta(int id) {
 
-        return manager.find(ContaDTO.class, id);
+        return manager.find(Conta.class, id);
 
     }
 
     //busca conta na base de dados pelo nome (ou parte dele)
     //A consulta não é case sensitive, porém deve-se respeitar a acentuacao
-    public List<ContaDTO> getContaPorNome(ContaDTO conta) {
+    public List<Conta> getContaPorNome(Conta conta) {
 
         String sql = "select c from conta c where upper(c.nome) like '%" + conta.getNome().toUpperCase() + "%'";
         Query query = manager.createQuery(sql);
@@ -81,35 +79,28 @@ public class ContaDAO {
     }
 
     //Buscando Contas por periodo de vencimento (DATA)
-    public List<ContaDTO> getContaPorVencimento(ContaVencimentoVO vencimentos) throws ParseException {
-
-        Calendar dataInicial = Calendar.getInstance();
-        Calendar dataFinal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat(Constantes.FORMATO_DATA);
+    public List<Conta> getContaPorVencimento(ContaVencimento vencimentos) {
         
-        dataInicial.setTime(sdf.parse(vencimentos.getVencimentoInicial()));
-        dataFinal.setTime(sdf.parse(vencimentos.getVencimentoFinal()));
-        
-        String sql = "select c from conta c where c.data between :pDataInicial and :pDataFinal ";
+        String sql = "select c from conta c where c.dataConta between :pDataInicial and :pDataFinal ";
         Query query = manager.createQuery(sql);
-        query.setParameter("pDataInicial", dataInicial);
-        query.setParameter("pDataFinal", dataFinal);
+        query.setParameter("pDataInicial", vencimentos.getVencimentoInicial());
+        query.setParameter("pDataFinal", vencimentos.getVencimentoFinal());
         return query.getResultList();
 
     }
 
     //Buscando Contas por periodo de vencimento (ANO / MES)
-    public List<ContaDTO> getContaPorAnoMes(ContaVencimentoVO vencimentos) {
+    public List<Conta> getContaPorAnoMes(ContaVencimento vencimentos) {
 
         String dataPesquisa = geraDataPesquisa(vencimentos);
-        String sql = "select c from conta c where c.data like '%" + dataPesquisa + "%'";
+        String sql = "select c from conta c where c.dataConta like '%" + dataPesquisa + "%'";
         Query query = manager.createQuery(sql);
         return query.getResultList();
 
     }
 
     //Buscando Contas por Tipo de Lançamento
-    public List<ContaDTO> getContaPorTipoLancamento(ContaVO c) {
+    public List<Conta> getContaPorTipoLancamento(Conta c) {
 
         String sql = "select c from conta c where tipolancamento_id = :pTipoLancamentoID";
         Query query = manager.createQuery(sql);
@@ -118,17 +109,17 @@ public class ContaDAO {
 
     }
 
-    public TipoLancamentoDTO getTipoLancamento(Integer id) {
-        return manager.find(TipoLancamentoDTO.class, id);
+    public TipoLancamento getTipoLancamento(Integer id) {
+        return manager.find(TipoLancamento.class, id);
     }
 
-    public List<TipoLancamentoDTO> getTiposLancamento() {
+    public List<TipoLancamento> getTiposLancamento() {
         String sql = "select t from tipolancamento t";
         Query query = manager.createQuery(sql);
         return query.getResultList();
     }
 
-    public void insertTipoLancamento(List<TipoLancamentoDTO> lancamentos) {
+    public void insertTipoLancamento(List<TipoLancamento> lancamentos) {
         manager.persist(lancamentos);
     }
 
@@ -138,7 +129,7 @@ public class ContaDAO {
         - Se informado apenas o mes, concatena o 0 (zero) se menor que 10 e acrescenta - (traço)
         para garantir o retorno apenas de contas do mês referente.
      */
-    private String geraDataPesquisa(ContaVencimentoVO vencimentos) {
+    private String geraDataPesquisa(ContaVencimento vencimentos) {
 
         String dataPesquisa;
 
