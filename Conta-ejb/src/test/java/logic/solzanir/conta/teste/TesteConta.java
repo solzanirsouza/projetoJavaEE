@@ -1,10 +1,14 @@
 package logic.solzanir.conta.teste;
 
+import static java.lang.Thread.sleep;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import junit.framework.Assert;
+import logic.solzanir.banco.beans.BancoBean;
+import logic.solzanir.banco.database.BancoDAO;
+import logic.solzanir.banco.gestao.GestaoBanco;
 import logic.solzanir.banco.models.Banco;
 import logic.solzanir.conta.exception.ContaException;
 import logic.solzanir.conta.beans.ContaBean;
@@ -32,6 +36,9 @@ public class TesteConta {
     @Inject
     private ContaBean bean;
 
+    @Inject
+    private GestaoBanco gestao;
+
     private Conta conta;
 
     private final Date dataConta = new Date(System.currentTimeMillis());
@@ -46,7 +53,10 @@ public class TesteConta {
                         TipoLancamento.class,
                         ContaVencimento.class,
                         Constantes.class,
-                        Banco.class)
+                        Banco.class,
+                        BancoBean.class,
+                        BancoDAO.class,
+                        GestaoBanco.class)
                 .addAsResource("META-INF/persistence.xml")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
@@ -55,7 +65,7 @@ public class TesteConta {
 
         TipoLancamento tipoLancamento = new TipoLancamento();
         tipoLancamento.setId(3);
-        
+
         conta = new Conta();
         conta.setNome("TESTE");
         conta.setData(dataConta);
@@ -71,8 +81,9 @@ public class TesteConta {
         try {
 
             conta = bean.insertConta(conta);
-            Assert.assertTrue(conta.getId() > 0);
+
             bean.removeConta(conta);
+            Assert.assertTrue(conta.getId() > 0);
 
         } catch (ContaException ex) {
             //Implementar LOGGER
@@ -89,8 +100,9 @@ public class TesteConta {
         conta.setNome(nomeConta);
         bean.updateConta(conta);
         Conta contaRetorno = bean.findContaById(conta.getId());
-        Assert.assertTrue(contaRetorno.getNome().equals(nomeConta));
+
         bean.removeConta(conta);
+        Assert.assertTrue(contaRetorno.getNome().equals(nomeConta));
 
     }
 
@@ -99,8 +111,9 @@ public class TesteConta {
     public void testaRemocaoDeConta() throws ContaException {
 
         conta = bean.insertConta(conta);
-        Assert.assertTrue(conta.getId() > 0);
+
         bean.removeConta(conta);
+        Assert.assertTrue(conta.getId() > 0);
 
     }
 
@@ -111,8 +124,9 @@ public class TesteConta {
         List<Conta> contas = new ArrayList<>();
         conta = bean.insertConta(conta);
         contas = bean.findAllConta();
-        Assert.assertTrue(contas.size() > 0);
+
         bean.removeConta(conta);
+        Assert.assertTrue(contas.size() > 0);
 
     }
 
@@ -131,8 +145,8 @@ public class TesteConta {
             }
         }
 
-        Assert.assertTrue(valida);
         bean.removeConta(conta);
+        Assert.assertTrue(valida);
 
     }
 
@@ -142,8 +156,9 @@ public class TesteConta {
 
         conta = bean.insertConta(conta);
         Conta contaRetorno = bean.findContaById(conta.getId());
-        Assert.assertTrue(contaRetorno.getNome().equals(conta.getNome()));
+
         bean.removeConta(conta);
+        Assert.assertTrue(contaRetorno.getNome().equals(conta.getNome()));
 
     }
 
@@ -162,8 +177,8 @@ public class TesteConta {
             }
         }
 
-        Assert.assertTrue(valida);
         bean.removeConta(conta);
+        Assert.assertTrue(valida);
 
     }
 
@@ -184,8 +199,8 @@ public class TesteConta {
             }
         }
 
-        Assert.assertTrue(valida);
         bean.removeConta(conta);
+        Assert.assertTrue(valida);
 
     }
 
@@ -206,8 +221,70 @@ public class TesteConta {
             }
         }
 
-        Assert.assertTrue(valida);
         bean.removeConta(conta);
+        Assert.assertTrue(valida);
+
+    }
+
+    @Test
+    @InSequence(10)
+    public void testaLogMovimentacaoContaCorrente() throws ContaException, InterruptedException {
+
+        TipoLancamento lancamento = new TipoLancamento();
+        lancamento.setId(4);
+
+        conta.setNome("TESTE BANCO");
+        conta.setTipoLancamento(lancamento);
+        bean.insertConta(conta);
+
+        sleep(500);
+
+        List<Conta> banco = gestao.getBanco();
+
+        boolean valida = false;
+        for (Conta c : banco) {
+            if (c.getNome().equals("TESTE BANCO")) {
+                valida = true;
+            }
+        }
+
+        gestao.clearBanco();
+        bean.removeConta(conta);
+        Assert.assertTrue(valida);
+
+    }
+
+    @Test
+    @InSequence(11)
+    public void testaLogMovimentacaoContaCorrenteComMaisDeUmaConta() throws ContaException, InterruptedException {
+
+        TipoLancamento lancamento = new TipoLancamento();
+        lancamento.setId(4);
+
+        //Conta 1
+        conta.setNome("TESTE BANCO");
+        conta.setTipoLancamento(lancamento);
+
+        bean.insertConta(conta);
+
+        //Conta 2
+        Conta conta2 = new Conta();
+        conta2.setNome("TESTE BANCO 2");
+        conta2.setData(new Date(System.currentTimeMillis()));
+        conta2.setValor(888);
+        conta2.setTipoLancamento(lancamento);
+
+        bean.insertConta(conta2);
+
+        sleep(500);
+
+        List<Conta> banco = gestao.getBanco();
+
+        Assert.assertEquals(2, banco.size());
+
+        gestao.clearBanco();
+        bean.removeConta(conta);
+        bean.removeConta(conta2);
 
     }
 

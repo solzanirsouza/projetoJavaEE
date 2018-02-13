@@ -3,6 +3,7 @@ package logic.solzanir.webservice.recursos;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import javax.persistence.PersistenceException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Produces;
@@ -18,6 +19,7 @@ import logic.solzanir.conta.models.ContaVencimento;
 import logic.solzanir.conta.models.MensagemResponse;
 import logic.solzanir.conta.beans.ContaBean;
 import logic.solzanir.conta.models.Conta;
+import logic.solzanir.conta.util.Constantes;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -29,16 +31,24 @@ public class ContaResource {
     @Inject
     private ContaBean bean;
 
-    @Inject
-    private MensagemResponse response;
+    private MensagemResponse response = new MensagemResponse();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getContas() {
 
-        List<Conta> retorno = new ArrayList<>();
-        retorno = bean.findAllConta();
-        return Response.ok().entity(retorno).build();
+        try {
+
+            List<Conta> retorno = new ArrayList<>();
+            retorno = bean.findAllConta();
+            return Response.ok().entity(retorno).build();
+
+        } catch (PersistenceException e) {
+
+            response.setMensagem(Constantes.ERRO_INTERNO + e.toString());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+
+        }
 
     }
 
@@ -47,8 +57,17 @@ public class ContaResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getConta(@PathParam("id") Integer id) {
 
-        Conta retorno = bean.findContaById(id);
-        return Response.ok().entity(retorno).build();
+        try {
+
+            Conta retorno = bean.findContaById(id);
+            return Response.ok().entity(retorno).build();
+
+        } catch (PersistenceException e) {
+
+            response.setMensagem(Constantes.ERRO_INTERNO + e.toString());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+
+        }
 
     }
 
@@ -58,9 +77,18 @@ public class ContaResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getContaPorNome(Conta conta) throws ContaException {
 
-        List<Conta> resposta = new ArrayList<>();
-        resposta = bean.findContaByName(conta);
-        return Response.ok().entity(resposta).build();
+        try {
+
+            List<Conta> resposta = new ArrayList<>();
+            resposta = bean.findContaByName(conta);
+            return Response.ok().entity(resposta).build();
+
+        } catch (PersistenceException e) {
+
+            response.setMensagem(Constantes.ERRO_INTERNO + e.toString());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+
+        }
 
     }
 
@@ -71,13 +99,23 @@ public class ContaResource {
     public Response getContaPorVencimento(ContaVencimento vencimentos) {
 
         List<Conta> retorno = new ArrayList<>();
+
         try {
+
             retorno = bean.findContaByData(vencimentos);
+            return Response.ok().entity(retorno).build();
+
         } catch (ContaException ex) {
+
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
+
+        } catch (PersistenceException ex) {
+
+            response.setMensagem(Constantes.ERRO_INTERNO + ex.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+
         }
-        return Response.ok().entity(retorno).build();
 
     }
 
@@ -87,9 +125,18 @@ public class ContaResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getContaPorTipoLacamento(Conta conta) throws ContaException {
 
-        List<Conta> retorno = new ArrayList<>();
-        retorno = bean.findContaByTipoLancamento(conta);
-        return Response.ok().entity(retorno).build();
+        try {
+
+            List<Conta> retorno = new ArrayList<>();
+            retorno = bean.findContaByTipoLancamento(conta);
+            return Response.ok().entity(retorno).build();
+
+        } catch (PersistenceException e) {
+
+            response.setMensagem(Constantes.ERRO_INTERNO + e.toString());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+
+        }
 
     }
 
@@ -97,40 +144,67 @@ public class ContaResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response insereConta(Conta conta) {
-        
-        Conta retorno = new Conta();
+
         try {
+
+            Conta retorno = new Conta();
             retorno = bean.insertConta(conta);
+            return Response.status(Response.Status.CREATED).entity(retorno).build();
+
         } catch (ContaException ex) {
+
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
+
+        } catch (PersistenceException ex) {
+
+            response.setMensagem(Constantes.ERRO_INTERNO + ex.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+
         }
-        return Response.status(Response.Status.CREATED).entity(retorno).build();
-        
+
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response atualizaConta(Conta conta) {
-        
+
         try {
+
             conta = bean.updateConta(conta);
+            return Response.ok("Conta atualizada com sucesso").entity(conta).build();
+
         } catch (ContaException ex) {
+
             response.setMensagem(ex.getMensagem());
             return Response.status(Response.Status.CONFLICT).entity(response).build();
+
+        } catch (PersistenceException e) {
+
+            response.setMensagem(Constantes.ERRO_INTERNO + e.toString());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+
         }
-        return Response.ok("Conta atualizada com sucesso").entity(conta).build();
-        
+
     }
 
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
     public Response removeConta(Conta conta) {
-        
-        bean.removeConta(conta);
-        return Response.ok("Conta removida com sucesso").build();
-        
+
+        try {
+
+            bean.removeConta(conta);
+            return Response.ok("Conta removida com sucesso").build();
+
+        } catch (PersistenceException e) {
+
+            response.setMensagem(Constantes.ERRO_INTERNO + e.toString());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+
+        }
+
     }
 
 }

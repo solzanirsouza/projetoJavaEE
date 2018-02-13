@@ -10,7 +10,7 @@ import logic.solzanir.conta.models.Conta;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
- * @date   30/01/2018
+ * @date 30/01/2018
  */
 @Stateless
 public class BancoBean {
@@ -20,13 +20,21 @@ public class BancoBean {
 
     @Inject
     private GestaoBanco gestao;
-    
+
     @Asynchronous
     public void gravaMovimentacaoBanco(@Observes Conta conta) {
-        
-        dao.incrementaSaldo(conta.getValor());
-        gestao.addConta(conta);
-        
+
+        try {
+
+            dao.incrementaSaldo(conta.getValor());
+            gestao.addConta(conta);
+
+        } catch (Exception e) {
+
+            //LOG
+            throw e;
+        }
+
     }
-    
+
 }

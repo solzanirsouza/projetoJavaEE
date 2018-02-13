@@ -1,18 +1,21 @@
 package logic.solzanir.conta.beans;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.persistence.PersistenceException;
 import javax.transaction.Transactional;
 import logic.solzanir.conta.exception.ContaException;
 import logic.solzanir.conta.models.ContaVencimento;
 import logic.solzanir.conta.util.Constantes;
 import logic.solzanir.conta.database.ContaDAO;
 import logic.solzanir.conta.models.Conta;
+import logic.solzanir.conta.models.TipoLancamento;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -27,16 +30,33 @@ public class ContaBean {
     @Inject
     private Event<Conta> event;
 
-    SimpleDateFormat sdf = new SimpleDateFormat(Constantes.FORMATO_DATA);
+    private static final Logger LOG = Logger.getLogger(ContaBean.class.getName());
+
+    private TipoLancamento tipoLancamento;
 
     @Transactional
     public Conta insertConta(Conta conta) throws ContaException {
 
-        validaConta(conta);
-        conta = dao.insertConta(conta);
+        try {
 
-        if (conta.getTipoLancamento().isBanco()) {
-            event.fire(conta);
+            validaConta(conta);
+            conta.setTipoLancamento(tipoLancamento);
+            conta = dao.insertConta(conta);
+
+            if (conta.getTipoLancamento().isBanco()) {
+                event.fire(conta);
+            }
+
+        } catch (ContaException e) {
+
+            LOG.log(Level.INFO, e.getMessage(), e);
+            throw e;
+
+        } catch (PersistenceException e) {
+
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
+
         }
 
         return conta;
@@ -46,8 +66,24 @@ public class ContaBean {
     @Transactional
     public Conta updateConta(Conta conta) throws ContaException {
 
-        validaConta(conta);
-        conta = dao.updateConta(conta);
+        try {
+
+            validaConta(conta);
+            conta.setTipoLancamento(tipoLancamento);
+            conta = dao.updateConta(conta);
+
+        } catch (ContaException e) {
+
+            LOG.log(Level.INFO, e.getMessage(), e);
+            throw e;
+
+        } catch (PersistenceException e) {
+
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
+
+        }
+
         return conta;
 
     }
@@ -55,14 +91,32 @@ public class ContaBean {
     @Transactional
     public void removeConta(Conta conta) {
 
-        dao.deleteConta(conta);
+        try {
+
+            dao.deleteConta(conta);
+
+        } catch (PersistenceException e) {
+
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
+
+        }
 
     }
 
     @Transactional
     public Conta findContaById(int id) {
 
-        return dao.getConta(id);
+        try {
+
+            return dao.getConta(id);
+
+        } catch (PersistenceException e) {
+
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
+
+        }
 
     }
 
@@ -71,8 +125,17 @@ public class ContaBean {
 
         List<Conta> contas = new ArrayList<>();
 
-        for (Conta conta : dao.getContas()) {
-            contas.add(conta);
+        try {
+
+            for (Conta conta : dao.getContas()) {
+                contas.add(conta);
+            }
+
+        } catch (PersistenceException e) {
+
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
+
         }
 
         return contas;
@@ -84,8 +147,17 @@ public class ContaBean {
 
         List<Conta> contas = new ArrayList<>();
 
-        for (Conta contadb : dao.getContaPorNome(conta)) {
-            contas.add(contadb);
+        try {
+
+            for (Conta contadb : dao.getContaPorNome(conta)) {
+                contas.add(contadb);
+            }
+
+        } catch (PersistenceException e) {
+
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
+
         }
 
         return contas;
@@ -97,40 +169,49 @@ public class ContaBean {
 
         List<Conta> contas = new ArrayList<>();
 
-        /*
+        try {
+
+            /*
             Se o cliente informar um Ano ou Mes a consulta considera estes campos,
             se não considera a data informada, se não informada data final
             repete-se a data inicial
-         */
-        if (vencimento.getAno() != 0 || vencimento.getMes() != 0) {
+             */
+            if (vencimento.getAno() != 0 || vencimento.getMes() != 0) {
 
-            for (Conta conta : dao.getContaPorAnoMes(vencimento)) {
-                contas.add(conta);
-            }
-
-        } else {
-
-            if (vencimento.getVencimentoFinal() == null) {
-
-                if (vencimento.getVencimentoInicial() == null) {
-                    throw new ContaException(Constantes.DATAINVALIDA);
-                } else {
-                    vencimento.setVencimentoFinal(vencimento.getVencimentoInicial());
+                for (Conta conta : dao.getContaPorAnoMes(vencimento)) {
+                    contas.add(conta);
                 }
 
             } else {
 
-                if (vencimento.getVencimentoInicial() == null) {
-                    vencimento.setVencimentoInicial(vencimento.getVencimentoFinal());
+                if (vencimento.getVencimentoFinal() == null) {
+
+                    if (vencimento.getVencimentoInicial() == null) {
+                        throw new ContaException(Constantes.DATAINVALIDA);
+                    } else {
+                        vencimento.setVencimentoFinal(vencimento.getVencimentoInicial());
+                    }
+
                 } else {
-                    ordenaDatas(vencimento);
+
+                    if (vencimento.getVencimentoInicial() == null) {
+                        vencimento.setVencimentoInicial(vencimento.getVencimentoFinal());
+                    } else {
+                        ordenaDatas(vencimento);
+                    }
+
+                }
+
+                for (Conta conta : dao.getContaPorVencimento(vencimento)) {
+                    contas.add(conta);
                 }
 
             }
 
-            for (Conta conta : dao.getContaPorVencimento(vencimento)) {
-                contas.add(conta);
-            }
+        } catch (PersistenceException e) {
+
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
 
         }
 
@@ -141,7 +222,16 @@ public class ContaBean {
     @Transactional
     public List<Conta> findContaByTipoLancamento(Conta conta) {
 
-        return dao.getContaPorTipoLancamento(conta);
+        try {
+
+            return dao.getContaPorTipoLancamento(conta);
+
+        } catch (PersistenceException e) {
+
+            LOG.log(Level.SEVERE, e.getMessage(), e);
+            throw e;
+
+        }
 
     }
 
@@ -161,21 +251,30 @@ public class ContaBean {
         }
     }
 
+    /*
+        Valida os campos informados pelo cliente para cadastro de conta
+        verificando se os campos são nulos ou possuem um informação inválida
+     */
     private void validaConta(Conta conta) throws ContaException {
 
-        if (conta.getNome().isEmpty()) {
+        if (conta.getNome() == null || (conta.getNome().length() < 5)) {
             throw new ContaException(Constantes.NOMEOBRIGATORIO);
         }
 
         if (conta.getTipoLancamento() == null) {
             throw new ContaException(Constantes.TIPOLANCAMENTOOBRIGATORIO);
+        } else {
+            tipoLancamento = dao.getTipoLancamento(conta.getTipoLancamento().getId());
+            if (tipoLancamento == null) {
+                throw new ContaException(Constantes.TIPOLANCAMENTOINVALIDO);
+            }
         }
 
         if (conta.getData() == null) {
             throw new ContaException(Constantes.DATAOBRIGATORIO);
         }
 
-        if (conta.getValor() <= 0) {
+        if (conta.getValor() == null || conta.getValor() <= 0) {
             throw new ContaException(Constantes.VALOROBRIGATORIO);
         }
 

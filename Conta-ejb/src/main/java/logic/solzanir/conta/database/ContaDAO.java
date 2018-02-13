@@ -23,7 +23,6 @@ public class ContaDAO {
     public Conta insertConta(Conta conta) {
 
         manager.persist(conta);
-        conta.setTipoLancamento(getTipoLancamento(conta.getTipoLancamento().getId()));
         return conta;
 
     }
