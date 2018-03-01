@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import junit.framework.Assert;
+import logic.solzanir.agendador.Agendador;
 import logic.solzanir.banco.beans.BancoBean;
 import logic.solzanir.banco.database.BancoDAO;
 import logic.solzanir.banco.gestao.GestaoBanco;
@@ -17,6 +18,8 @@ import logic.solzanir.conta.models.Conta;
 import logic.solzanir.conta.models.ContaVencimento;
 import logic.solzanir.conta.models.TipoLancamento;
 import logic.solzanir.conta.util.Constantes;
+import logic.solzanir.message.producer.ContaProducer;
+import logic.solzanir.message.receiver.ContaReceiver;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -56,7 +59,10 @@ public class TesteConta {
                         Banco.class,
                         BancoBean.class,
                         BancoDAO.class,
-                        GestaoBanco.class)
+                        GestaoBanco.class,
+                        ContaProducer.class,
+                        ContaReceiver.class,
+                        Agendador.class)
                 .addAsResource("META-INF/persistence.xml")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }

@@ -4,9 +4,11 @@ import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import logic.solzanir.banco.database.BancoDAO;
 import logic.solzanir.banco.gestao.GestaoBanco;
 import logic.solzanir.conta.models.Conta;
+import logic.solzanir.message.producer.ContaProducer;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -22,14 +24,15 @@ public class BancoBean {
     private GestaoBanco gestao;
 
     @Asynchronous
-    public void gravaMovimentacaoBanco(@Observes Conta conta) {
+    public void gravaMovimentacaoBanco(@Observes Conta conta) throws Exception {
 
         try {
 
-            dao.incrementaSaldo(conta.getValor());
+            ContaProducer producer = new ContaProducer();
+            producer.sendContaCorrente(conta);
             gestao.addConta(conta);
 
-        } catch (Exception e) {
+        } catch (JMSException e) {
 
             //LOG
             throw e;
