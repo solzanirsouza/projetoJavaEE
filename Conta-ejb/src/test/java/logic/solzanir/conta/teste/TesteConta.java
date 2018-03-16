@@ -18,8 +18,7 @@ import logic.solzanir.conta.models.Conta;
 import logic.solzanir.conta.models.ContaVencimento;
 import logic.solzanir.conta.models.TipoLancamento;
 import logic.solzanir.conta.util.Constantes;
-import logic.solzanir.message.producer.ContaProducer;
-import logic.solzanir.message.receiver.ContaReceiver;
+import logic.solzanir.message.producer.ProducerBean;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -60,8 +59,7 @@ public class TesteConta {
                         BancoBean.class,
                         BancoDAO.class,
                         GestaoBanco.class,
-                        ContaProducer.class,
-                        ContaReceiver.class,
+                        ProducerBean.class,
                         Agendador.class)
                 .addAsResource("META-INF/persistence.xml")
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");

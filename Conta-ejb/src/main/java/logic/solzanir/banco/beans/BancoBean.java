@@ -4,11 +4,10 @@ import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.jms.JMSException;
 import logic.solzanir.banco.database.BancoDAO;
 import logic.solzanir.banco.gestao.GestaoBanco;
 import logic.solzanir.conta.models.Conta;
-import logic.solzanir.message.producer.ContaProducer;
+import logic.solzanir.message.producer.ProducerBean;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -26,18 +25,12 @@ public class BancoBean {
     @Asynchronous
     public void gravaMovimentacaoBanco(@Observes Conta conta) throws Exception {
 
-        try {
 
-            ContaProducer producer = new ContaProducer();
+            ProducerBean producer = new ProducerBean();
             producer.sendContaCorrente(conta);
             gestao.addConta(conta);
 
-        } catch (JMSException e) {
-
-            //LOG
-            throw e;
-        }
-
+ 
     }
 
 }

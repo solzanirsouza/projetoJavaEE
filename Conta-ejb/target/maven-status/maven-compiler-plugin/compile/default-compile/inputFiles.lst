@@ -11,5 +11,4 @@
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/conta/util/Constantes.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/conta/models/TipoLancamento.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/conta/models/MensagemResponse.java
-/home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/message/receiver/ContaReceiver.java
 /home/solzanir/Documents/projetoJavaEE/Conta-ejb/src/main/java/logic/solzanir/conta/models/ContaVencimento.java
