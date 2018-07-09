@@ -1,7 +1,9 @@
 logic/solzanir/banco/models/Banco.class
 logic/solzanir/conta/exception/ContaException.class
 logic/solzanir/conta/models/MensagemResponse.class
+logic/solzanir/message/producer/ContaProducer.class
 logic/solzanir/conta/models/Conta.class
+logic/solzanir/agendador/Agendador.class
 logic/solzanir/banco/database/BancoDAO.class
 logic/solzanir/conta/util/Constantes.class
 logic/solzanir/conta/models/ContaVencimento.class

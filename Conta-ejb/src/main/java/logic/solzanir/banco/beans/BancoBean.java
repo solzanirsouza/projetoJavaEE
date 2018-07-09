@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import logic.solzanir.banco.database.BancoDAO;
 import logic.solzanir.banco.gestao.GestaoBanco;
 import logic.solzanir.conta.models.Conta;
+import logic.solzanir.message.producer.ProducerBean;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -22,19 +23,14 @@ public class BancoBean {
     private GestaoBanco gestao;
 
     @Asynchronous
-    public void gravaMovimentacaoBanco(@Observes Conta conta) {
+    public void gravaMovimentacaoBanco(@Observes Conta conta) throws Exception {
 
-        try {
 
-            dao.incrementaSaldo(conta.getValor());
+            ProducerBean producer = new ProducerBean();
+            producer.sendContaCorrente(conta);
             gestao.addConta(conta);
 
-        } catch (Exception e) {
-
-            //LOG
-            throw e;
-        }
-
+ 
     }
 
 }
