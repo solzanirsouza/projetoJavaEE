@@ -91,11 +91,20 @@
             <version>2.0</version>
             <scope>provided</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>9.2-1004-jdbc4</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.github.cukespace</groupId>
+            <artifactId>cukespace-core</artifactId>
+            <version>1.5.10</version>
+            <scope>test</scope>
+        </dependency>
+        
     </dependencies>
 
     <build>
