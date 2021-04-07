@@ -8,7 +8,7 @@
    
         <container qualifier="jboss" default="true">
               <configuration>
-                    <property name="jbossHome">/home/solzanir/Downloads/wildfly</property>
+                    <property name="jbossHome">/home/logic/Documents/Solzanir/wildfly-8.0.0.Final</property>
               </configuration>
         </container>
         
