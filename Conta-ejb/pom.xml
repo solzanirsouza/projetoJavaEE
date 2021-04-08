@@ -103,8 +103,21 @@
             <artifactId>cukespace-core</artifactId>
             <version>1.5.10</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.shrinkwrap</groupId>
+                    <artifactId>shrinkwrap-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-        
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.1</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

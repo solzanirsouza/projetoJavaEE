@@ -1,13 +1,15 @@
 package logic.solzanir.conta.database;
 
-import java.util.List;
+import logic.solzanir.conta.models.Conta;
+import logic.solzanir.conta.models.ContaVencimento;
+import logic.solzanir.conta.models.TipoLancamento;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import logic.solzanir.conta.models.Conta;
-import logic.solzanir.conta.models.ContaVencimento;
-import logic.solzanir.conta.models.TipoLancamento;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Solzanir Souza <souzanirs@gmail.com>
@@ -18,6 +20,34 @@ public class ContaDAO {
 
     @PersistenceContext
     EntityManager manager;
+
+    private Conta contaDB;
+
+    public void criarConta(Integer id, String nomeConta, Double saldo) {
+        contaDB = new Conta();
+        contaDB.setId(id);
+        contaDB.setData(new Date());
+        contaDB.setNome(nomeConta);
+        contaDB.setValor(saldo);
+    }
+
+    public Conta getContaDB(String nomeConta) {
+        if (contaDB.getNome().equalsIgnoreCase(nomeConta)) {
+            return contaDB;
+
+        } else {
+            return null;
+        }
+    }
+
+    public void atualizarSaldo(Double novoSaldo) throws Exception {
+        if (0 > novoSaldo) {
+            throw new Exception("Saldo Insuficiente");
+
+        } else {
+            contaDB.setValor(novoSaldo);
+        }
+    }
 
     //Insere uma nova conta na base de dados
     public Conta insertConta(Conta conta) {
@@ -31,12 +61,12 @@ public class ContaDAO {
     public Conta updateConta(Conta conta) {
 
         Conta contadb = manager.find(Conta.class, conta.getId());
-        
+
         if (contadb != null) {
             contadb = conta;
             manager.merge(contadb);
         }
-        
+
         return contadb;
 
     }
@@ -79,7 +109,7 @@ public class ContaDAO {
 
     //Buscando Contas por periodo de vencimento (DATA)
     public List<Conta> getContaPorVencimento(ContaVencimento vencimentos) {
-        
+
         String sql = "select c from conta c where c.dataConta between :pDataInicial and :pDataFinal ";
         Query query = manager.createQuery(sql);
         query.setParameter("pDataInicial", vencimentos.getVencimentoInicial());

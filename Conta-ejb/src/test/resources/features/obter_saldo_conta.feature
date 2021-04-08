@@ -15,4 +15,5 @@ Funcionalidade: Inclusão do cônjuge no cadastro do cliente
     Dado que a conta corrente "8765-4" possua saldo positivo de "50"
     Quando seleciona a conta "8765-4"
     E informado o valor "100" para saque da conta
+    E confirmada a transacao
     Entao se apresenta a mensagem "Saldo Insuficiente"
